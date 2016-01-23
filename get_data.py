@@ -7,20 +7,6 @@ from numpy import dot
 from io import BytesIO
 import urllib2
 
-import contextlib
-import sys
-import cStringIO
-
-@contextlib.contextmanager
-def nostdout():
-    save_stdout = sys.stdout
-    sys.stdout = cStringIO.StringIO()
-    yield
-    sys.stdout = save_stdout
-
-def rgb2gray(image):
-    return dot(image[...,:3], [0.299, 0.587, 0.114])
-
 def process_item(item):
     try:
         # Extract useful data from line
