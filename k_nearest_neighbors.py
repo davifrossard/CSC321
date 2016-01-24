@@ -18,4 +18,4 @@ def knn_classify(train_x, train_y, x, k, distfun):
 
     x_class = max(classes, key=lambda y: classes.count(y))
 
-    return x_class
+    return x_class, nn

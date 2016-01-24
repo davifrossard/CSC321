@@ -22,6 +22,6 @@ def fetch_sets(source, actors, train=100, validation=10, test=10):
                 x_test.append(faces[i])
                 t_test.append(actor)
         else:
-            print "NOT enough data for actor "+actor
+            print "Not enough data for actor "+actor
 
     return x_train, t_train, x_validation, t_validation, x_test, t_test
