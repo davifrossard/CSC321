@@ -3,12 +3,11 @@ from multiprocessing import Pool, TimeoutError
 from socket import timeout
 from hashlib import sha256
 from scipy.misc import imread
-import matplotlib.pyplot as plt
 from io import BytesIO
 import urllib2
 import sys
 
-def process_item(item):
+def process_item(item, dtimeout=2):
     try:
         # Extract useful data from line
         url = item[3]
@@ -17,7 +16,7 @@ def process_item(item):
 
         # Try fetching the url
         try:
-            image = urllib2.urlopen(url, timeout=2)
+            image = urllib2.urlopen(url, timeout=dtimeout)
         except urllib2.URLError,e:
             # print "[EF] "+url+" ["+filename+"] threw error "+str(e)
             return [0]
@@ -61,22 +60,18 @@ def fetch_data_artist(target_data, target, amount, numthreads=10, threadtimeout=
         last = 0
         while imsuccess < amount:
             diff = amount - imsuccess
-            processes = [pool.apply_async(process_item, [i]) for i in target_data[last:last+diff]]
+            processes = [pool.apply_async(process_item, [i, threadtimeout]) for i in target_data[last:last+diff]]
             last += diff
             for process in processes:
-                try:
-                    retval = process.get(timeout=threadtimeout)
-                    imsuccess += retval[0]
-                    ratio = (float(imsuccess) / amount)*100
-                    sys.stdout.write("\r%.2f%%" % ratio)
-                    sys.stdout.flush()
-                    if retval[0] == 1:
-                        photos.append(retval[1])
-                        faces.append(retval[2])
-                        actors.append(target)
-                except TimeoutError,e:
-                    pass
-                    # print "Thread timeout"
+                retval = process.get()
+                imsuccess += retval[0]
+                ratio = (float(imsuccess) / amount)*100
+                sys.stdout.write("\r%.2f%%" % ratio)
+                sys.stdout.flush()
+                if retval[0] == 1:
+                    photos.append(retval[1])
+                    faces.append(retval[2])
+                    actors.append(target)
 
     # Download all images
     else:
@@ -99,7 +94,7 @@ def fetch_data_artist(target_data, target, amount, numthreads=10, threadtimeout=
     return total_success, photos, faces, actors
 
 
-def fetch_data(source, targets, amount, numthreads=50, threadtimeout=2):
+def fetch_data(source, targets, amount, numthreads=10, threadtimeout=3):
     data_lines = list([a.split("\t") for a in open(source).readlines()])
     total_success = 0;
     photos = []

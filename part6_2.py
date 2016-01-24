@@ -17,21 +17,25 @@ else:
     plot_graphs = False
 
 plt.gray()
-if os.path.exists("results/part 4/k sweep"):
-    shutil.rmtree("results/part 4/k sweep")
-os.makedirs("results/part 4/k sweep")
+if os.path.exists("results/part 6/k sweep"):
+    shutil.rmtree("results/part 6/k sweep")
+os.makedirs("results/part 6/k sweep")
 
-x_train_f, t_train_f, x_validation_f, t_validation_f, x_test_f, t_test_f = fetch_sets("subset_actresses.txt", ['Lorraine Bracco', 'Peri Gilpin', 'Angie Harmon'], 100, 10, 10)
-x_train_m, t_train_m, x_validation_m, t_validation_m, x_test_m, t_test_m = fetch_sets("subset_actors.txt", ['Gerard Butler', 'Daniel Radcliffe', 'Michael Vartan'], 100, 10, 10)
+x_train_f = fetch_sets("subset_actresses.txt", ['Lorraine Bracco', 'Peri Gilpin', 'Angie Harmon'], 100, 0, 0)[0]
+x_train_m = fetch_sets("subset_actors.txt", ['Gerard Butler', 'Daniel Radcliffe', 'Michael Vartan'], 100, 0, 0)[0]
 
+_, _, x_validation_f, _, x_test_f, _ = fetch_sets("subset_actresses.txt", ['Carmen Electra', 'Kim Cattrall', 'Loni Anderson'], 0, 10, 10)
+_, _, x_validation_m, _, x_test_m, _ = fetch_sets("subset_actors.txt", ['Chris Klein', 'Leonardo DiCaprio', 'Jason Statham'], 0, 10, 10)
+
+genders = ['Male', 'Female']
 x_train = x_train_f + x_train_m
-t_train = np.array(t_train_f + t_train_m)
+t_train = np.hstack((np.ones(len(x_train_f)), np.zeros(len(x_train_m))))
 
 x_validation = x_validation_f + x_validation_m
-t_validation = np.array(t_validation_f + t_validation_m)
+t_validation = np.hstack((np.ones(len(x_validation_f)), np.zeros(len(x_validation_m))))
 
 x_test = x_test_f + x_test_m
-t_test = np.array(t_test_f + t_test_m)
+t_test = np.hstack((np.ones(len(x_test_f)), np.zeros(len(x_test_m))))
 
 min_dim = min(map(np.shape, x_train+x_validation+x_test))
 
@@ -73,5 +77,5 @@ plt.title('K Sweep')
 plt.axis([-10, len(x_train), 0, 100])
 plt.legend(loc=0)
 plt.grid()
-plt.savefig('results/part 4/k sweep/k sweep.%s' %(save_ext))
+plt.savefig('results/part 6/k sweep/k sweep.%s' %(save_ext))
 plt.show() if plot_graphs else plt.clf()

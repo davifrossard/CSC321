@@ -9,7 +9,6 @@ from io import BytesIO
 import sys
 import urllib2
 import os
-import shutil
 
 
 def process_item(item, dtimeout=2):
@@ -22,6 +21,10 @@ def process_item(item, dtimeout=2):
         imhash = item[5].strip()
         facecoord = map(int, item[4].split(','))
         filename = name + "/" + name + '_' + str(index) + '.' + ext
+
+        if os.path.exists("cropped/" + filename):
+            # print "[EF] "+url+" ["+filename+"] already exists"
+            return 0
 
         # Try fetching the url
         try:
@@ -41,10 +44,6 @@ def process_item(item, dtimeout=2):
             # print "[HF] "+url+" ["+filename+"] Hash check failed"
             return 0
 
-        if os.path.exists("cropped/" + filename):
-            # print "[EF] "+url+" ["+filename+"] already exists"
-            return 0
-
         # Crop face and save as greyscale
         imarray = imread(BytesIO(image_data), 1)
         face = imarray[facecoord[1]:facecoord[3], facecoord[0]:facecoord[2]]
@@ -62,7 +61,7 @@ def process_item(item, dtimeout=2):
         return 0
 
 
-def fetch_data_files(source, targets, amount, numthreads=10, threadtimeout=1):
+def fetch_data_files(source, targets, amount, numthreads=10, threadtimeout=3):
     data_lines = list([a.split("\t") for a in open(source).readlines()])
     pool = Pool(processes=numthreads)
     total_sucess = 0;
@@ -74,10 +73,13 @@ def fetch_data_files(source, targets, amount, numthreads=10, threadtimeout=1):
         if len(target_data) == 0:
             print target + " not found in the source"
             continue
-        # Create artist's directory, overwrite if existent
-        if os.path.exists("cropped/" + target):
-            shutil.rmtree("cropped/" + target)
-        os.makedirs("cropped/" + target)
+        if amount > len(target_data):
+            print "Not enough data for " + target
+            continue
+
+        # Create artist's directory
+        if not os.path.exists("cropped/" + target):
+            os.makedirs("cropped/" + target)
 
         # Only download a determinate amount of images
         imsuccess = 0
@@ -86,8 +88,11 @@ def fetch_data_files(source, targets, amount, numthreads=10, threadtimeout=1):
             print "Downloading images of " + target
             while imsuccess < amount:
                 diff = amount - imsuccess
-                processes = [pool.apply_async(process_item, [i]) for i in target_data[last:last + diff]]
+                if last > len(target_data):
+                    raise ValueError('Not enough data for %s - %d requested, %d found' %(target, amount, imsuccess))
+                processes = [pool.apply_async(process_item, [i, threadtimeout]) for i in target_data[last:last + diff]]
                 last += diff
+
                 for process in processes:
                     try:
                         imsuccess += process.get()
@@ -119,17 +124,17 @@ def fetch_data_files(source, targets, amount, numthreads=10, threadtimeout=1):
     print "Done"
 
 
-def fetch_data(source, targets, amount):
+def fetch_data(source, targets, amount, numthreads=10, threadtimeout=3):
     faces = []
     actors = []
     total_success = 0
     for target in targets:
         tfaces = glob("cropped/" + target + "/*")
         if len(tfaces) < amount:
-            fetch_data_files(source, [target], amount)
+            fetch_data_files(source, [target], amount-len(tfaces), numthreads, threadtimeout)
             tfaces = glob("cropped/" + target + "/*")
         for i in range(len(tfaces)):
             faces.append(imread(tfaces[i]))
             actors.append(target)
-        total_success += i + 1
+        total_success += len(tfaces)
     return total_success, [], faces, actors

@@ -16,36 +16,34 @@ else:
     save_ext = 'eps'
     plot_graphs = False
 
-
 plt.gray()
-if os.path.exists("results/part 3/k sensitivity"):
-    shutil.rmtree("results/part 3/k sensitivity")
-os.makedirs("results/part 3/k sensitivity")
-if os.path.exists("results/part 3/mislabels"):
-    shutil.rmtree("results/part 3/mislabels")
-os.makedirs("results/part 3/mislabels")
+if os.path.exists("results/part 5/k sensitivity"):
+    shutil.rmtree("results/part 5/k sensitivity")
+os.makedirs("results/part 5/k sensitivity")
+if os.path.exists("results/part 5/mislabels"):
+    shutil.rmtree("results/part 5/mislabels")
+os.makedirs("results/part 5/mislabels")
 
-x_train_f, t_train_f, x_validation_f, t_validation_f, x_test_f, t_test_f = fetch_sets("subset_actresses.txt", ['Lorraine Bracco', 'Peri Gilpin', 'Angie Harmon'])
-x_train_m, t_train_m, x_validation_m, t_validation_m, x_test_m, t_test_m = fetch_sets("subset_actors.txt", ['Gerard Butler', 'Daniel Radcliffe', 'Michael Vartan'])
-
+x_train_f, _, x_validation_f, _, x_test_f, _ = fetch_sets("subset_actresses.txt", ['Lorraine Bracco', 'Peri Gilpin', 'Angie Harmon'], 100, 10, 10)
+x_train_m, _, x_validation_m, _, x_test_m, _ = fetch_sets("subset_actors.txt", ['Gerard Butler', 'Daniel Radcliffe', 'Michael Vartan'], 100, 10, 10)
+genders = ['Male', 'Female']
 x_train = x_train_f + x_train_m
-t_train = np.array(t_train_f + t_train_m)
+t_train = np.hstack((np.ones(len(x_train_f)), np.zeros(len(x_train_m))))
 
 x_validation = x_validation_f + x_validation_m
-t_validation = np.array(t_validation_f + t_validation_m)
+t_validation = np.hstack((np.ones(len(x_validation_f)), np.zeros(len(x_validation_m))))
 
 x_test = x_test_f + x_test_m
-t_test = np.array(t_test_f + t_test_m)
+t_test = np.hstack((np.ones(len(x_test_f)), np.zeros(len(x_test_m))))
 
-# min_dim = min(map(np.shape, x_train+x_validation+x_test))
-min_dim = (32,32)
+min_dim = min(map(np.shape, x_train+x_validation+x_test))
 
 xto = np.array(x_train)
 xteo = np.array(x_test)
 
-x_train = np.array([np.hstack(imresize(x, min_dim)) for x in x_train])
-x_validation = np.array([np.hstack(imresize(x, min_dim)) for x in x_validation])
-x_test = np.array([np.hstack(imresize(x, min_dim)) for x in x_test])
+x_train = np.array([np.hstack(imresize(x, (32,32))) for x in x_train])
+x_validation = np.array([np.hstack(imresize(x, (32,32))) for x in x_validation])
+x_test = np.array([np.hstack(imresize(x, (32,32))) for x in x_test])
 
 krange = range(1,len(x_train),2)
 validation_errors = np.zeros(len(krange))
@@ -73,14 +71,14 @@ for j, k in enumerate(best_k):
                 _, nn = knn_classify(x_train, t_train, xi, 5, euclidean_distance)
                 plt.subplot(1,2,1)
                 plt.imshow(xteo[i])
-                plt.title(t_test[i])
+                plt.title(genders[int(t_test[i])])
                 plt.axis('off')
                 for n, m in enumerate([3,4,7,8,11]):
                     plt.subplot(3,4,m)
                     plt.imshow(xto[nn[n]])
-                    plt.title(t_train[nn[n]])
+                    plt.title(genders[int(t_train[nn[n]])])
                     plt.axis('off')
-                plt.savefig('results/part 3/mislabels/%d_%d.%s' %(k, i, save_ext))
+                plt.savefig('results/part 6/mislabels/%d_%d.%s' %(k, i, save_ext))
                 plt.clf()
             trigger += 1
     print "K = %d - Test Errors = %d" %(k, test_errors[j])
@@ -100,5 +98,5 @@ plt.title('K Sensitivity Test')
 plt.axis([-10, len(x_train), 0, 100])
 plt.legend(loc=0)
 plt.grid()
-plt.savefig('results/part 3/k sensitivity/k sensitivity.%s' %(save_ext))
+plt.savefig('results/part 5/k sensitivity/k sensitivity.%s' %(save_ext))
 plt.show() if plot_graphs else plt.clf()

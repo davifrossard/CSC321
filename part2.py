@@ -8,10 +8,11 @@ def fetch_sets(source, actors, train=100, validation=10, test=10):
     t_train = []
     t_validation = []
     t_test = []
+    total = train+validation+test
 
     for actor in actors:
         num_points, _, faces, _ = fetch_data(source, [actor], train+validation+test)
-        if num_points >= train+validation+test:
+        if num_points >= total:
             for i in range(0,train):
                 x_train.append(faces[i])
                 t_train.append(actor)
@@ -22,6 +23,6 @@ def fetch_sets(source, actors, train=100, validation=10, test=10):
                 x_test.append(faces[i])
                 t_test.append(actor)
         else:
-            print "Not enough data for actor "+actor
+            raise ValueError('Not enough data for %s - %d requested, %d found' %(actor, total, num_points))
 
     return x_train, t_train, x_validation, t_validation, x_test, t_test
