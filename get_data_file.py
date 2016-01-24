@@ -10,14 +10,15 @@ import sys
 import urllib2
 import os
 
+i = 0
 
-def process_item(item, dtimeout=2):
+def process_item(item, dtimeout=3):
     try:
         # Extract useful data from line
         name = item[0]
         url = item[3]
         ext = url.split('.')[-1]
-        index = item[1]
+        index = item[2]
         imhash = item[5].strip()
         facecoord = map(int, item[4].split(','))
         filename = name + "/" + name + '_' + str(index) + '.' + ext
@@ -52,7 +53,7 @@ def process_item(item, dtimeout=2):
 
         # Everything went as expected
         if os.path.exists("cropped/" + filename):
-            # print "[S] "+url+" ["+filename+"] downloaded"
+            # print "[S] "+url+" ["+filename+"] Downloaded"
             return 1
         else:
             return 0
@@ -89,52 +90,39 @@ def fetch_data_files(source, targets, amount, numthreads=10, threadtimeout=3):
             while imsuccess < amount:
                 diff = amount - imsuccess
                 if last > len(target_data):
-                    raise ValueError('Not enough data for %s - %d requested, %d found' %(target, amount, imsuccess))
+                    raise ValueError('Not enough data for %s - %d requested, %d found' % (target, amount, imsuccess))
                 processes = [pool.apply_async(process_item, [i, threadtimeout]) for i in target_data[last:last + diff]]
                 last += diff
 
                 for process in processes:
-                    try:
-                        imsuccess += process.get()
-                        ratio = (float(imsuccess) / amount) * 100
-                        sys.stdout.write("\r%.2f%%" % ratio)
-                        sys.stdout.flush()
-                    except TimeoutError, e:
-                        pass
-
+                    imsuccess += process.get()
+                    ratio = (float(imsuccess) / amount) * 100
+                    sys.stdout.write("\r%.2f%%" % ratio)
+                    sys.stdout.flush()
 
         # Download all images
         else:
             print "Downloading images of " + target
             processes = [pool.apply_async(process_item, [i, threadtimeout]) for i in target_data]
             for process in processes:
-                try:
-                    imsuccess += process.get()
-                    ratio = (float(imsuccess) / len(target_data)) * 100
-                    sys.stdout.write("\r%.2f%%" % ratio)
-                    sys.stdout.flush()
-                except TimeoutError, e:
-                    pass
-                    # print "Thread timeout"
+                imsuccess += process.get()
+                ratio = (float(imsuccess) / len(target_data)) * 100
+                sys.stdout.write("\r%.2f%%" % ratio)
+                sys.stdout.flush()
+
         print "\nDownloaded %d image[s] of %s" % (imsuccess, target)
         total_sucess += imsuccess
 
     return total_sucess
-    # Job finished
-    print "Done"
 
 
 def fetch_data(source, targets, amount, numthreads=10, threadtimeout=3):
     faces = []
-    actors = []
-    total_success = 0
     for target in targets:
         tfaces = glob("cropped/" + target + "/*")
         if len(tfaces) < amount:
-            fetch_data_files(source, [target], amount-len(tfaces), numthreads, threadtimeout)
+            fetch_data_files(source, [target], amount - len(tfaces), numthreads, threadtimeout)
             tfaces = glob("cropped/" + target + "/*")
         for i in range(len(tfaces)):
             faces.append(imread(tfaces[i]))
-            actors.append(target)
-        total_success += len(tfaces)
-    return total_success, [], faces, actors
+    return faces
