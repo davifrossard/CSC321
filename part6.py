@@ -49,7 +49,7 @@ x_train = np.array([np.hstack(imresize(x, (32,32))) for x in x_train])
 x_validation = np.array([np.hstack(imresize(x, (32,32))) for x in x_validation])
 x_test = np.array([np.hstack(imresize(x, (32,32))) for x in x_test])
 
-krange = range(1,len(x_train),2)
+krange = [i for j in (range(1,10), range(11, len(x_train),5)) for i in j]
 validation_errors = np.zeros(len(krange))
 for j, k in enumerate(krange):
     for i, xi in enumerate(x_validation):
@@ -57,7 +57,7 @@ for j, k in enumerate(krange):
 
         if ti != t_validation[i]:
             validation_errors[j] += 1
-    print "K = %d - Validation Errors = %d" %(k, validation_errors[j])
+    print "K = %d - Validation Errors = %d (%d%%)" %(k, validation_errors[j], validation_errors[j]/len(x_validation)*100)
 
 best_k = np.where(validation_errors == validation_errors.min())[0]
 best_k = np.array(krange)[best_k]
@@ -65,6 +65,7 @@ print "Best values for k: %s\n" %best_k
 
 test_errors = np.zeros(len(best_k))
 trigger = 0
+nl=0
 for j, k in enumerate(best_k):
     for i, xi in enumerate(x_test):
         ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance)
@@ -82,10 +83,11 @@ for j, k in enumerate(best_k):
                     plt.imshow(xto[nn[n]])
                     plt.title(genders[int(t_train[nn[n]])])
                     plt.axis('off')
-                plt.savefig('results/part 6/mislabels/%d_%d.%s' %(k, i, save_ext))
-                plt.clf()
+                plt.savefig('results/part 6/mislabels/%d.%s' %(nl, save_ext))
+                nl += 1
+                plt.close()
             trigger += 1
-    print "K = %d - Test Errors = %d" %(k, test_errors[j])
+    print "K = %d - Test Errors = %d (%d%%)" %(k, test_errors[j], test_errors[j]/len(x_test)*100)
 
 best_k_t = np.where(test_errors == test_errors.min())[0]
 best_k_t = best_k[best_k_t]
@@ -103,4 +105,4 @@ plt.axis([-10, len(x_train), 0, 100])
 plt.legend(loc=0)
 plt.grid()
 plt.savefig('results/part 6/k sensitivity/k sensitivity.%s' %(save_ext))
-plt.show() if plot_graphs else plt.clf()
+plt.show() if plot_graphs else plt.close()
