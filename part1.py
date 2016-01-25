@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from numpy import shape, std
+from numpy import shape, std, vstack, mean, savetxt
 from scipy.misc import imresize
 from get_data import *
 import os
@@ -35,17 +35,21 @@ for i in range(len(act)):
     plt.savefig("results/part 1/photos/%d.%s"%(i, save_ext))
     plt.show() if plot_graphs else plt.close()
 
-_, photos, faces, _ = fetch_data("subset_actors.txt", ['Richard Madden'], 10)
+_, photos, faces, _ = fetch_data("subset_actors.txt", ['Richard Madden'], 15)
 dims = map(shape, faces)
 min_dim = min(dims)
 faces_rd = [imresize(f, min_dim) for f in faces]
 
 # Calculate standard deviation in dimensions
-print "Dimension Standart Deviation: %f" %(std(dims))
+stdev = tuple([int(std(y)) for y in zip(*dims)][:-1])
+avg = tuple([int(mean(y)) for y in zip(*dims)][:-1])
+print "Dimension Standart Deviation: %s" %(stdev,)
+print "Dimension Average: %s" %(avg,)
+savetxt("results/part 1/faces_statistics.csv", vstack((stdev, avg)), fmt='%s')
 
 # Print overlay of multiple faces
 plt.title('Richard Madden')
 for i in range(len(faces)):
-    plt.imshow(faces_rd[i], alpha=0.1)
+    plt.imshow(faces_rd[i], alpha=0.05)
 plt.savefig("results/part 1/face overlay/face overlay.%s" %(save_ext))
 plt.show() if plot_graphs else plt.close()
