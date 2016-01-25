@@ -39,7 +39,7 @@ x_train = np.array([np.hstack(imresize(x, (32,32))) for x in x_train])
 x_validation = np.array([np.hstack(imresize(x, (32,32))) for x in x_validation])
 x_test = np.array([np.hstack(imresize(x, (32,32))) for x in x_test])
 
-krange = range(1,len(x_train),5)
+krange = [i for j in (range(1,10), range(11, len(x_train),10)) for i in j]
 train_errors = np.zeros(len(krange))
 validation_errors = np.zeros(len(krange))
 test_errors = np.zeros(len(krange))
@@ -59,7 +59,10 @@ for j, k in enumerate(krange):
         ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance)
         if ti != t_test[i]:
             test_errors[j] += 1
-    print "K = %d - Train Errors = %d - Validation Errors = %d - Test Errors = %d" %(k, train_errors[j], validation_errors[j], test_errors[j])
+    print "K = %d - Train Errors = %d (%d%%) - Validation Errors = %d (%d%%) - Test Errors = %d (%d%%)" %(k, \
+                                                    train_errors[j], train_errors[j]/len(x_train)*100,\
+                                                    validation_errors[j], validation_errors[j]/len(x_validation)*100,\
+                                                    test_errors[j], test_errors[j]/len(x_test)*100)
 
 font = {'size' : 15}
 matplotlib.rc('font', **font)
@@ -74,4 +77,4 @@ plt.axis([-10, len(x_train), 0, 100])
 plt.legend(loc=0)
 plt.grid()
 plt.savefig('results/part 4/k sweep/k sweep.%s' %(save_ext))
-plt.show() if plot_graphs else plt.clf()
+plt.show() if plot_graphs else plt.close()
