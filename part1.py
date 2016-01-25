@@ -33,7 +33,7 @@ for i in range(len(act)):
     plt.subplot(1,2,2)
     plt.imshow(faces[i])
     plt.savefig("results/part 1/photos/%d.%s"%(i, save_ext))
-    plt.show() if plot_graphs else plt.clf()
+    plt.show() if plot_graphs else plt.close()
 
 _, photos, faces, _ = fetch_data("subset_actors.txt", ['Richard Madden'], 10)
 dims = map(shape, faces)
@@ -48,4 +48,4 @@ plt.title('Richard Madden')
 for i in range(len(faces)):
     plt.imshow(faces_rd[i], alpha=0.1)
 plt.savefig("results/part 1/face overlay/face overlay.%s" %(save_ext))
-plt.show() if plot_graphs else plt.clf()
+plt.show() if plot_graphs else plt.close()
