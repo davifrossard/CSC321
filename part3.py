@@ -84,7 +84,7 @@ for j, k in enumerate(best_k):
                     plt.imshow(xto[nn[n]])
                     plt.title(t_train[nn[n]])
                     plt.axis('off')
-                plt.savefig('results/part 3/mislabels/%d_%d.%s' %(nl, save_ext))
+                plt.savefig('results/part 3/mislabels/%d.%s' %(nl, save_ext))
                 nl+=1
                 plt.close()
             trigger += 1
