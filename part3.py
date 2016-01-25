@@ -60,9 +60,9 @@ for j, k in enumerate(krange):
 
 best_ki = np.where(validation_errors == validation_errors.min())[0]
 best_k = np.array(krange)[best_ki]
-best_perf = validation_errors[best_ki]
+best_perf = validation_errors[best_ki]/len(x_validation)*100
 print "Best values for k: %s\n" %best_k
-plt.savetxt("results/part 3/eval_performance.csv", np.array(zip(best_k, best_perf)), fmt='%i %i')
+np.savetxt("results/part 3/eval_performance.csv", np.array(zip(best_k, best_perf)), fmt='%i %i')
 
 test_errors = np.zeros(len(best_k))
 trigger = 0
@@ -92,9 +92,9 @@ for j, k in enumerate(best_k):
 
 best_k_ti = np.where(test_errors == test_errors.min())[0]
 best_k_t = best_k[best_k_ti]
-best_perf = test_errors[best_k_ti]
+best_perf = test_errors[best_k_ti]/len(x_test)*100
 print "Best values for k: %s" %best_k_t
-plt.savetxt("results/part 3/test_performance.csv", np.array(zip(best_k_t, best_perf)), fmt='%i %i')
+np.savetxt("results/part 3/test_performance.csv", np.array(zip(best_k_t, best_perf)), fmt='%i %i')
 
 font = {'size' : 15}
 matplotlib.rc('font', **font)
