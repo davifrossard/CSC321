@@ -1,6 +1,8 @@
 import subprocess
 import os
+import tempfile
 import shutil
+from glob import glob
 
 save_ext = raw_input("Enter extension to save graphs [eps by default]: ") or 'eps'
 show_graph = '1' if raw_input("Show graph windows [y/N]? ").lower() == 'y' else '0'
@@ -33,3 +35,14 @@ subprocess.call("python part5.py %s %s" %(save_ext, show_graph), shell=True)
 print "\n\nRUNNING PART 6"
 subprocess.call("python part6.py %s %s" %(save_ext, show_graph), shell=True)
 subprocess.call("python part6_2.py %s %s" %(save_ext, show_graph), shell=True)
+
+print "\n\nCOMPILING REPORT"
+current = os.getcwd()
+temp = tempfile.mkdtemp()
+shutil.copy('faces.tex',temp)
+os.chdir(temp)
+subprocess.call(['pdflatex','faces.tex'])
+subprocess.call(['pdflatex','faces.tex'])
+shutil.copy('faces.pdf',current)
+shutil.rmtree(temp)
+
