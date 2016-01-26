@@ -1,10 +1,11 @@
-from part2 import fetch_sets
-import numpy as np
 from k_nearest_neighbors import knn_classify
 from distance_functions import euclidean_distance
+from collections import defaultdict
+from scipy.misc import imresize
+from part2 import fetch_sets
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from scipy.misc import imresize
 import os
 import shutil
 import sys
@@ -50,9 +51,10 @@ x_test = np.array([np.hstack(imresize(x, min_dim)) for x in x_test])
 
 krange = [i for j in (range(1,10), range(11, len(x_train),5), [len(x_train)]) for i in j]
 validation_errors = np.zeros(len(krange))
+validation_distances = defaultdict(list)
 for j, k in enumerate(krange):
     for i, xi in enumerate(x_validation):
-        ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance)
+        ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance, validation_distances[i])
 
         if ti != t_validation[i]:
             validation_errors[j] += 1
@@ -67,14 +69,15 @@ np.savetxt("results/part_3/eval_performance.csv", np.array(zip(best_k, best_perf
 test_errors = np.zeros(len(best_k))
 trigger = 0
 nl=0
+test_distances = defaultdict(list)
 for j, k in enumerate(best_k):
     for i, xi in enumerate(x_test):
-        ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance)
+        ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance, test_distances[i])
         if ti != t_test[i]:
             test_errors[j] += 1
 
             if trigger % 2 == 0:
-                _, nn = knn_classify(x_train, t_train, xi, 5, euclidean_distance)
+                _, nn = knn_classify(x_train, t_train, xi, 5, euclidean_distance, test_distances[i])
                 plt.suptitle(t_test[i], size=20)
                 plt.subplot(1,2,1)
                 plt.imshow(xteo[i])

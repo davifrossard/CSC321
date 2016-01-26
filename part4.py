@@ -1,10 +1,11 @@
 from part2 import fetch_sets
-import numpy as np
 from k_nearest_neighbors import knn_classify
 from distance_functions import euclidean_distance
+from scipy.misc import imresize
+from collections import defaultdict
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from scipy.misc import imresize
 import os
 import shutil
 import sys
@@ -41,22 +42,25 @@ x_test = np.array([np.hstack(imresize(x, (32,32))) for x in x_test])
 
 krange = [i for j in (range(1,10), range(11, len(x_train),10), [len(x_train)]) for i in j]
 train_errors = np.zeros(len(krange))
+train_distances = defaultdict(list)
 validation_errors = np.zeros(len(krange))
+validation_distances = defaultdict(list)
 test_errors = np.zeros(len(krange))
+test_distances = defaultdict(list)
 for j, k in enumerate(krange):
     # Train Dataset
     for i, xi in enumerate(x_train):
-        ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance)
+        ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance, train_distances[i])
         if ti != t_train[i]:
             train_errors[j] += 1
     # Validation Dataset
     for i, xi in enumerate(x_validation):
-        ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance)
+        ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance, validation_distances[i])
         if ti != t_validation[i]:
             validation_errors[j] += 1
     # Test Dataset
     for i, xi in enumerate(x_test):
-        ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance)
+        ti, _ = knn_classify(x_train, t_train, xi, k, euclidean_distance, test_distances[i])
         if ti != t_test[i]:
             test_errors[j] += 1
     print "K = %d - Train Errors = %d (%d%%) - Validation Errors = %d (%d%%) - Test Errors = %d (%d%%)" %(k, \
