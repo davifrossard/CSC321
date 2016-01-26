@@ -1,4 +1,5 @@
 from get_data_file import *
+from numpy import shape
 
 def fetch_sets(source, actors, train=100, validation=10, test=10):
     x_train = []
@@ -13,6 +14,7 @@ def fetch_sets(source, actors, train=100, validation=10, test=10):
     for actor in actors:
         faces = fetch_data(source, [actor], train+validation+test)
         num_points = len(faces)
+        sorted(faces, key=shape)
         if num_points >= total:
             for i in range(0,train):
                 x_train.append(faces[i])
