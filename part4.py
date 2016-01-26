@@ -17,9 +17,9 @@ else:
     plot_graphs = False
 
 plt.gray()
-if os.path.exists("results/part 4/k sweep"):
-    shutil.rmtree("results/part 4/k sweep")
-os.makedirs("results/part 4/k sweep")
+if os.path.exists("results/part_4/k_sweep"):
+    shutil.rmtree("results/part_4/k_sweep")
+os.makedirs("results/part_4/k_sweep")
 
 x_train_f, t_train_f, x_validation_f, t_validation_f, x_test_f, t_test_f = fetch_sets("subset_actresses.txt", ['Lorraine Bracco', 'Peri Gilpin', 'Angie Harmon'], 100, 10, 10)
 x_train_m, t_train_m, x_validation_m, t_validation_m, x_test_m, t_test_m = fetch_sets("subset_actors.txt", ['Gerard Butler', 'Daniel Radcliffe', 'Michael Vartan'], 100, 10, 10)
@@ -39,7 +39,7 @@ x_train = np.array([np.hstack(imresize(x, (32,32))) for x in x_train])
 x_validation = np.array([np.hstack(imresize(x, (32,32))) for x in x_validation])
 x_test = np.array([np.hstack(imresize(x, (32,32))) for x in x_test])
 
-krange = [i for j in (range(1,10), range(11, len(x_train),10)) for i in j]
+krange = [i for j in (range(1,10), range(11, len(x_train),10), [len(x_train)]) for i in j]
 train_errors = np.zeros(len(krange))
 validation_errors = np.zeros(len(krange))
 test_errors = np.zeros(len(krange))
@@ -76,5 +76,5 @@ plt.title('K Sweep')
 plt.axis([-10, len(x_train), 0, 100])
 plt.legend(loc=0)
 plt.grid()
-plt.savefig('results/part 4/k sweep/k sweep.%s' %(save_ext))
+plt.savefig('results/part_4/k_sweep/k_sweep.%s' %(save_ext), bbox_inches='tight')
 plt.show() if plot_graphs else plt.close()

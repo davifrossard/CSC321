@@ -30,16 +30,17 @@
 \usepackage{extramarks} % Required for headers and footers
 \usepackage[usenames,dvipsnames]{color} % Required for custom colors
 \usepackage{graphicx} % Required to insert images
-\usepackage{subcaption}
+\usepackage{subcaption} 
 \usepackage{listings} % Required for insertion of code
 \usepackage{courier} % Required for the courier font
 \usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
 \usepackage{pgfplotstable} % Import csv data
 \usepackage{amsmath} % Math equation tools
-\usepackage[pdftex]{hyperref} % Create references
-
-
-\pgfplotsset{compat=1.12}
+\usepackage{hyperref} % Create references\pgfplotsset{compat=1.12}
+\usepackage{pgf} % Loops in latex
+\usepackage{bookmark}
+\usepackage{booktabs}
+\usepackage{float}
 
 % Margins
 \topmargin=-0.45in
@@ -184,39 +185,292 @@
 
 
 %----------------------------------------------------------------------------------------
-%	EXAMPLE PROBLEM 
+%	PART 1
 %----------------------------------------------------------------------------------------
-
 
 \begin{homeworkProblem}
 
+The dataset consists of 3167 links to pictures of 15 actors and 3169 links to picture of 15 actresses, each photo and face is uniquely identified and contains the coordinates for the face on the picture. The dimensions of the pictures vary considerably and some links are broken or have corrupted images.
 
-dae
-%\begin{figure*}[h!]
-%    \centering
-%    \includegraphics[width=\columnwidth]{results/Task_4.eps}
-%    \caption{Multivariate regression of artificial dataset and cost plots}
-%    \label{fig:task4}
-%\end{figure*}
-%
-%\begin{figure*}[h!]
-%    \centering
-%    \scalebox{0.85}{\input{results/Task_4_eq.pgf}}
-%    \label{fig:task4_eq}
-%\end{figure*}
-%
-%\begin{center}
-%\pgfplotstabletypeset[
-%    col sep=space,
-%    string type,
-%    display columns/0/.style={column name=\textbf{Training Set Size (N)}, column type={|c|}},
-%    display columns/1/.style={column name=\textbf{Validation Errors}, column type={c|}},
-%    every head row/.style={before row=\hline,after row=\hline},
-%    every last row/.style={after row=\hline},
-%    ]{results/
-%    Task_5.csv}
-%\end{center}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{results/part_1/photos/1}
+    \caption{Photo of Gerard Butler}
+\end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{results/part_1/photos/2}
+    \caption{Photo of Leonardo DiCaprio}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{results/part_1/photos/3}
+    \caption{Photo of Jason Statham}
+\end{figure}
+
+If we sample 15 faces of the same actor, we get the statistics for the dimensions shown in \autoref{t1:stats}, which shows great dissimilarity in terms of dimensions. If we then resize them to the same dimensions and overlay them, we get the picture shown in \autoref{t1:overlay}. From it we can see that the features are not perfectly aligned and there are some considerable outliers, however we can still identify the artist.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{results/part_1/face_overlay/face_overlay}
+    \caption{Overlay of 15 faces of Richard Madden}
+    \label{t1:overlay}
+\end{figure}
+
+\begin{table}[H]
+\begin{center}
+\pgfplotstabletypeset[
+    header=false,
+    every head row/.style={
+        before row=\toprule
+    },
+    every last row/.style={
+        after row=\bottomrule
+    },
+    display columns/0/.style={column name={}},
+    display columns/1/.style={column name={$Width$}},
+    display columns/2/.style={column name={$Length$}},
+    /pgf/number format/precision=4,
+    create on use/newcol/.style={
+        create col/set list={$\sigma$,$\bar{\chi}$}
+    },
+    columns/newcol/.style={string type},
+    columns={newcol,0,1}
+]{results/part_1/faces_statistics.csv}
+\end{center}
+\caption{Standard deviation and average of faces dimensions}
+\label{t1:stats} 
+\end{table}
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+%	PART 2
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{t2}
+
+To produce the train, validation and test sets we first invoke a function to download the needed amount of pictures for each actor, it downloads the images, crops the faces out, resizes them and converts to grayscale. It then saves the resized faces to disk (for reproducibility in the future) and also returns them as numpy arrays. Another function is then called, this one takes the array of faces and slices them according to the parameters used, by default 100 for training, 10 for validation, 10 for test. Finally it returns two numpy arrays for each set, one containing the image data and the other one the class of each image (the actor portrayed).
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+%	PART 3
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{t3}
+
+Given a face we want to determine the actor portrayed, to do that we use \textit{K}-Nearest Neighbors. First we have to determine the optimum value of nearest neighbors to consider (\textit{K}). We first sweep values from 1 to the size of the datasets, which returns \autoref{t3:k_sens}. We then select the values of \textit{K} that gives the better results (\autoref{t3:k_eval}) and test it against the test set, which gives us \autoref{t3:k_test}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{results/part_3/k_sensitivity/k_sensitivity}
+    \caption{\textit{K} sensitivity test on validation set}
+    \label{t3:k_sens}
+\end{figure}
+
+\begin{table}[H]
+\begin{center}
+\pgfplotstabletypeset[
+    col sep=space,
+    string type,
+    display columns/0/.style={column name=\textbf{\textit{K}}, column type={c}},
+    display columns/1/.style={column name=\textbf{Validation Errors (\%)}, column type={c}},
+    every head row/.style={before row=\toprule},
+    every last row/.style={after row=\bottomrule}
+    ]{results/part_3/eval_performance.csv}
+\end{center}
+\caption{Best performance on validation set}
+\label{t3:k_eval} 
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+\pgfplotstabletypeset[
+    col sep=space,
+    string type,
+    display columns/0/.style={column name=\textbf{\textit{K}}, column type={c}},
+    display columns/1/.style={column name=\textbf{Test Errors (\%)}, column type={c}},
+    every head row/.style={before row=\toprule},
+    every last row/.style={after row=\bottomrule}
+    ]{results/part_3/test_performance.csv}
+\end{center}
+\caption{Evaluation of \textit{K} on test set.}
+\label{t3:k_test} 
+\end{table}
+
+Some failure cases on the test set are shown below, for each sample its five nearest neighbours are shown in order on the right, correct candidates are in greed, incorrect in red: 
+\foreach \x in {1,3,5,7,9}{
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{results/part_3/mislabels/\x}
+\end{figure}
+}
+
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	PART 4
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+
+If we sweep the values of \textit{K} from 1 to the length of training set with a step of 1 until 10 and a step of 10 afterwards, we get the graph depicted in \autoref{t4:k_sweep}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{results/part_4/k_sweep/k_sweep}
+    \caption{\textit{K} sensitivity test across all sets}
+    \label{t4:k_sweep}
+\end{figure}
+
+For lower values of \textit{K} (specially 1) the model is over-fitted to the training set, since the nearest neighbor of a sample will always be itself. As \textit{K} increases the decision boundary becomes more and more smoothed, which leads to under-fitting. Its worth noting how when \textit{K} equals the size of the training set the performance replicates that of $\textit{K} = 1$, this happens because the way the sets are made (discussed in \autoref{t2}) ensures that there are no dominant class on the training set, that is, all classes have the same amount of samples. This way, when \textit{K} approaches the size of the training set all classes will have the same amount of votes and therefore it will just be assigned to the one of its nearest neighbor.
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	PART 5
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{t5}
+
+Now, given a face we want to determine the gender of the actor portrayed. Same as in \autoref{t3}, we determine the optimum value of \textit{K} by sweeping the values on the validation set, which returns \autoref{t5:k_sens}. We then compare the optimum values against the test set, which gives us \autoref{t5:k_test}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{results/part_5/k_sensitivity/k_sensitivity}
+    \caption{\textit{K} sensitivity test on validation set.}
+    \label{t5:k_sens}
+\end{figure}
+
+\begin{table}[H]
+\begin{center}
+\pgfplotstabletypeset[
+    col sep=space,
+    string type,
+    display columns/0/.style={column name=\textbf{\textit{K}}, column type={c}},
+    display columns/1/.style={column name=\textbf{Validation Errors (\%)}, column type={c}},
+    every head row/.style={before row=\toprule},
+    every last row/.style={after row=\bottomrule}
+    ]{results/part_5/eval_performance.csv}
+\end{center}
+\caption{Best performance on validation set.}
+\label{t5:k_eval} 
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+\pgfplotstabletypeset[
+    col sep=space,
+    string type,
+    display columns/0/.style={column name=\textbf{\textit{K}}, column type={c}},
+    display columns/1/.style={column name=\textbf{Test Errors (\%)}, column type={c}},
+    every head row/.style={before row=\toprule},
+    every last row/.style={after row=\bottomrule}
+    ]{results/part_5/test_performance.csv}
+\end{center}
+\caption{Best performance on test set.}
+\label{t5:k_test} 
+\end{table}
+
+Some failures are shown below, following the same model of \autoref{t3}:
+\foreach \x in {1,3,5,7,9}{
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{results/part_5/mislabels/\x}
+\end{figure}
+}
+
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	PART 5
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+
+We now repeat \autoref{t5}, however for the validation and test set we use faces of actors that are not present in the training set, following the same process we get:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{results/part_6/k_sensitivity/k_sensitivity}
+    \caption{\textit{K} sensitivity test on validation set.}
+    \label{t6:k_sens}
+\end{figure}
+
+\begin{table}[H]
+\begin{center}
+\pgfplotstabletypeset[
+    col sep=space,
+    string type,
+    display columns/0/.style={column name=\textbf{\textit{K}}, column type={c}},
+    display columns/1/.style={column name=\textbf{Validation Errors (\%)}, column type={c}},
+    every head row/.style={before row=\toprule},
+    every last row/.style={after row=\bottomrule}
+    ]{results/part_6/eval_performance.csv}
+\end{center}
+\caption{Best performance on validation set.}
+\label{t6:k_eval} 
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+\pgfplotstabletypeset[
+    col sep=space,
+    string type,
+    display columns/0/.style={column name=\textbf{\textit{K}}, column type={c}},
+    display columns/1/.style={column name=\textbf{Test Errors (\%)}, column type={c}},
+    every head row/.style={before row=\toprule},
+    every last row/.style={after row=\bottomrule}
+    ]{results/part_6/test_performance.csv}
+\end{center}
+\caption{Best performance on test set.}
+\label{t6:k_test} 
+\end{table}
+
+Some failures are shown below, following the same model of \autoref{t3}:
+\foreach \x in {1,3,5,7,9}{
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{results/part_6/mislabels/\x}
+\end{figure}
+}
+
+To better illustrate how this task differs from \autoref{t5} and \autoref{t3}, we do a sweep of \textit{K} across all sets, like we did in \autoref{t4}, we get the result shown in \autoref{t6:k_sweep}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{results/part_6/k_sweep/k_sweep}
+    \caption{\textit{K} sensitivity test across all sets}
+    \label{t6:k_sweep}
+\end{figure}
+
+Its noticeable how the accuracy between the training set and test and validation sets differ far more than in \autoref{t4:k_sweep}. This happens because before we were classifying actors that were in all sets, this way each sample outside the training set had a high likelihood of having a sample in the training set that shared many features, since it is the same person. When the actors on the training set are different than the ones on the validation and test sets we start to rely on inherent features of man and woman to make the classification, which poses as a harder task since the barrier becomes more blurry, evidenced by how the performance changed from \autoref{t5:k_test} to \autoref{t6:k_test}.
 
 \clearpage
 \end{homeworkProblem}
