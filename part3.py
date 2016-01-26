@@ -19,12 +19,12 @@ else:
 
 
 plt.gray()
-if os.path.exists("results/part 3/k sensitivity"):
-    shutil.rmtree("results/part 3/k sensitivity")
-os.makedirs("results/part 3/k sensitivity")
-if os.path.exists("results/part 3/mislabels"):
-    shutil.rmtree("results/part 3/mislabels")
-os.makedirs("results/part 3/mislabels")
+if os.path.exists("results/part_3/k_sensitivity"):
+    shutil.rmtree("results/part_3/k_sensitivity")
+os.makedirs("results/part_3/k_sensitivity")
+if os.path.exists("results/part_3/mislabels"):
+    shutil.rmtree("results/part_3/mislabels")
+os.makedirs("results/part_3/mislabels")
 
 x_train_f, t_train_f, x_validation_f, t_validation_f, x_test_f, t_test_f = fetch_sets("subset_actresses.txt", ['Lorraine Bracco', 'Peri Gilpin', 'Angie Harmon'])
 x_train_m, t_train_m, x_validation_m, t_validation_m, x_test_m, t_test_m = fetch_sets("subset_actors.txt", ['Gerard Butler', 'Daniel Radcliffe', 'Michael Vartan'])
@@ -48,7 +48,7 @@ x_train = np.array([np.hstack(imresize(x, min_dim)) for x in x_train])
 x_validation = np.array([np.hstack(imresize(x, min_dim)) for x in x_validation])
 x_test = np.array([np.hstack(imresize(x, min_dim)) for x in x_test])
 
-krange = [i for j in (range(1,10), range(11, len(x_train),5)) for i in j]
+krange = [i for j in (range(1,10), range(11, len(x_train),5), [len(x_train)]) for i in j]
 validation_errors = np.zeros(len(krange))
 for j, k in enumerate(krange):
     for i, xi in enumerate(x_validation):
@@ -62,7 +62,7 @@ best_ki = np.where(validation_errors == validation_errors.min())[0]
 best_k = np.array(krange)[best_ki]
 best_perf = validation_errors[best_ki]/len(x_validation)*100
 print "Best values for k: %s\n" %best_k
-np.savetxt("results/part 3/eval_performance.csv", np.array(zip(best_k, best_perf)), fmt='%i %i')
+np.savetxt("results/part_3/eval_performance.csv", np.array(zip(best_k, best_perf)), fmt='%i %i')
 
 test_errors = np.zeros(len(best_k))
 trigger = 0
@@ -75,16 +75,20 @@ for j, k in enumerate(best_k):
 
             if trigger % 2 == 0:
                 _, nn = knn_classify(x_train, t_train, xi, 5, euclidean_distance)
+                plt.suptitle(t_test[i], size=20)
                 plt.subplot(1,2,1)
                 plt.imshow(xteo[i])
-                plt.title(t_test[i])
+                plt.title(ti, color='red')
                 plt.axis('off')
                 for n, m in enumerate([3,4,7,8,11]):
                     plt.subplot(3,4,m)
                     plt.imshow(xto[nn[n]])
-                    plt.title(t_train[nn[n]])
+                    if t_train[nn[n]] != t_test[i]:
+                        plt.title(t_train[nn[n]], color='red')
+                    else:
+                        plt.title(t_train[nn[n]], color='green')
                     plt.axis('off')
-                plt.savefig('results/part 3/mislabels/%d.%s' %(nl, save_ext))
+                plt.savefig('results/part_3/mislabels/%d.%s' %(nl, save_ext), bbox_inches='tight')
                 nl+=1
                 plt.close()
             trigger += 1
@@ -94,7 +98,7 @@ best_k_ti = np.where(test_errors == test_errors.min())[0]
 best_k_t = best_k[best_k_ti]
 best_perf = test_errors[best_k_ti]/len(x_test)*100
 print "Best values for k: %s" %best_k_t
-np.savetxt("results/part 3/test_performance.csv", np.array(zip(best_k_t, best_perf)), fmt='%i %i')
+np.savetxt("results/part_3/test_performance.csv", np.array(zip(best_k_t, best_perf)), fmt='%i %i')
 
 font = {'size' : 15}
 matplotlib.rc('font', **font)
@@ -107,5 +111,5 @@ plt.title('K Sensitivity Test')
 plt.axis([-10, len(x_train), 0, 100])
 plt.legend(loc=0)
 plt.grid()
-plt.savefig('results/part 3/k sensitivity/k_sensitivity.%s' %(save_ext))
+plt.savefig('results/part_3/k_sensitivity/k_sensitivity.%s' %(save_ext), bbox_inches='tight')
 plt.show() if plot_graphs else plt.close()
