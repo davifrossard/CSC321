@@ -119,7 +119,7 @@ def fetch_data_files(source, targets, amount, numthreads=10, threadtimeout=3):
 def fetch_data(source, targets, amount, numthreads=10, threadtimeout=3):
     faces = []
     for target in targets:
-        tfaces = glob("cropped/" + target + "/*")
+        tfaces = sorted(glob("cropped/" + target + "/*"))
         if len(tfaces) < amount:
             fetch_data_files(source, [target], amount - len(tfaces), numthreads, threadtimeout)
             tfaces = glob("cropped/" + target + "/*")

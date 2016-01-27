@@ -39,15 +39,8 @@ t_validation = np.array(t_validation_f + t_validation_m)
 x_test = x_test_f + x_test_m
 t_test = np.array(t_test_f + t_test_m)
 
-# min_dim = min(map(np.shape, x_train+x_validation+x_test))
-min_dim = (32,32)
-
 xto = np.array(x_train)
 xteo = np.array(x_test)
-
-x_train = np.array([np.hstack(imresize(x, min_dim)) for x in x_train])
-x_validation = np.array([np.hstack(imresize(x, min_dim)) for x in x_validation])
-x_test = np.array([np.hstack(imresize(x, min_dim)) for x in x_test])
 
 krange = [i for j in (range(1,10), range(11, len(x_train),5), [len(x_train)]) for i in j]
 validation_errors = np.zeros(len(krange))
