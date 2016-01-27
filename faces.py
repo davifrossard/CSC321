@@ -39,10 +39,9 @@ print "\n\nCOMPILING REPORT"
 current = os.getcwd()
 temp = tempfile.mkdtemp()
 shutil.copy('faces.tex', temp)
-shutil.copytree('results', temp)
+shutil.move('results', temp)
 os.chdir(temp)
 subprocess.call(['pdflatex', 'faces.tex'])
 subprocess.call(['pdflatex', 'faces.tex'])
 shutil.copy('faces.pdf', current)
 shutil.rmtree(temp)
-
