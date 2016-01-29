@@ -2,6 +2,7 @@ import subprocess
 import os
 import tempfile
 import shutil
+import sys
 
 save_ext = raw_input("Enter extension to save graphs [pdf by default]: ") or 'pdf'
 show_graph = '1' if raw_input("Show graph windows [y/N]? ").lower() == 'y' else '0'
@@ -45,3 +46,9 @@ subprocess.call(['pdflatex', 'faces.tex'])
 subprocess.call(['pdflatex', 'faces.tex'])
 shutil.copy('faces.pdf', current)
 shutil.rmtree(temp)
+os.chdir(current)
+
+if sys.platform.startswith('linux'):
+    subprocess.call(['xdg-open', 'faces.pdf'])
+else:
+    os.startfile('faces.pdf')

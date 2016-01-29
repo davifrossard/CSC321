@@ -2,7 +2,7 @@ from k_nearest_neighbors import knn_classify
 from distance_functions import euclidean_distance
 from collections import defaultdict
 from scipy.misc import imresize
-from part2 import fetch_sets
+from part2 import fetch_sets, rgb2gray
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ if len(sys.argv) == 3:
     save_ext = sys.argv[1]
     plot_graphs = (sys.argv[2] == '1')
 else:
-    save_ext = 'eps'
+    save_ext = 'pdf'
     plot_graphs = False
 
 
@@ -41,6 +41,10 @@ t_test = np.array(t_test_f + t_test_m)
 
 xto = np.array(x_train)
 xteo = np.array(x_test)
+
+x_train = [rgb2gray(imresize(x, (32,32))) for x in x_train]
+x_validation = [rgb2gray(imresize(x, (32,32))) for x in x_validation]
+x_test = [rgb2gray(imresize(x, (32,32))) for x in x_test]
 
 krange = [i for j in (range(1,10), range(11, len(x_train),5), [len(x_train)]) for i in j]
 validation_errors = np.zeros(len(krange))
@@ -71,7 +75,7 @@ for j, k in enumerate(best_k):
 
             if trigger % 2 == 0:
                 _, nn = knn_classify(x_train, t_train, xi, 5, euclidean_distance, test_distances[i])
-                plt.suptitle(t_test[i], size=20)
+                plt.suptitle("%s (K=%d)" %(t_test[i], k), size=20)
                 plt.subplot(1,2,1)
                 plt.imshow(xteo[i])
                 plt.title(ti, color='red')

@@ -9,7 +9,7 @@ if len(sys.argv) == 3:
     save_ext = sys.argv[1]
     plot_graphs = (sys.argv[2] == '1')
 else:
-    save_ext = 'eps'
+    save_ext = 'pdf'
     plot_graphs = False
 
 if os.path.exists("results/part_1/photos"):

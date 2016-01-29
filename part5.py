@@ -1,4 +1,4 @@
-from part2 import fetch_sets
+from part2 import fetch_sets, rgb2gray
 from k_nearest_neighbors import knn_classify
 from distance_functions import euclidean_distance
 from collections import defaultdict
@@ -14,7 +14,7 @@ if len(sys.argv) == 3:
     save_ext = sys.argv[1]
     plot_graphs = (sys.argv[2] == '1')
 else:
-    save_ext = 'eps'
+    save_ext = 'pdf'
     plot_graphs = False
 
 plt.gray()
@@ -37,14 +37,12 @@ t_validation = np.hstack((np.ones(len(x_validation_f)), np.zeros(len(x_validatio
 x_test = x_test_f + x_test_m
 t_test = np.hstack((np.ones(len(x_test_f)), np.zeros(len(x_test_m))))
 
-# min_dim = min(map(np.shape, x_train+x_validation+x_test))
-
 xto = np.array(x_train)
 xteo = np.array(x_test)
 
-x_train = np.array([np.hstack(imresize(x, (32,32))) for x in x_train])
-x_validation = np.array([np.hstack(imresize(x, (32,32))) for x in x_validation])
-x_test = np.array([np.hstack(imresize(x, (32,32))) for x in x_test])
+x_train = [rgb2gray(imresize(x, (32,32))) for x in x_train]
+x_validation = [rgb2gray(imresize(x, (32,32))) for x in x_validation]
+x_test = [rgb2gray(imresize(x, (32,32))) for x in x_test]
 
 krange = [i for j in (range(1,10), range(11, len(x_train),5), [len(x_train)]) for i in j]
 validation_errors = np.zeros(len(krange))
@@ -74,7 +72,7 @@ for j, k in enumerate(best_k):
             test_errors[j] += 1
             if trigger % 2 == 0:
                 _, nn = knn_classify(x_train, t_train, xi, 5, euclidean_distance, test_distances[i])
-                plt.suptitle(genders[int(t_test[i])], size=20)
+                plt.suptitle("%s (K=%d)" %(genders[int(t_test[i])], k), size=20)
                 plt.subplot(1,2,1)
                 plt.imshow(xteo[i])
                 plt.title(genders[int(ti)], color='red')
@@ -95,7 +93,7 @@ for j, k in enumerate(best_k):
 
 best_k_ti = np.where(test_errors == test_errors.min())[0]
 best_k_t = best_k[best_k_ti]
-best_perf = validation_errors[best_k_ti]/len(x_test)*100
+best_perf = test_errors[best_k_ti]/len(x_test)*100
 np.savetxt("results/part_5/test_performance.csv", np.array(zip(best_k_t, best_perf)), fmt='%i %i')
 print "Best values for k: %s" %best_k_t
 

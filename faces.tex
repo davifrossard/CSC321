@@ -456,7 +456,7 @@ We now repeat \autoref{t5}, however for the validation and test set we use faces
 \end{table}
 
 Some failures are shown below, following the same model of \autoref{t3}:
-\foreach \x in {1,3,5,7,9}{
+\foreach \x in {1,4,7,10,13}{
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\columnwidth]{results/part_6/mislabels/\x}
@@ -472,7 +472,7 @@ To better illustrate how this task differs from \autoref{t5} and \autoref{t3}, w
     \label{t6:k_sweep}
 \end{figure}
 
-Its noticeable how the accuracy between the training set and test and validation sets differ far more than in \autoref{t4:k_sweep}. This happens because before we were classifying actors that were in all sets, this way each sample outside the training set had a high likelihood of having a sample in the training set that shared many features, since it is the same person. When the actors on the training set are different than the ones on the validation and test sets we start to rely on inherent features of man and woman to make the classification, which poses as a harder task since the barrier becomes more blurry, evidenced by how the performance changed from \autoref{t5:k_test} to \autoref{t6:k_test}.
+Its noticeable how the accuracy of the training set differ far more the test and validation sets than in \autoref{t4:k_sweep}. This happens because we were classifying actors that were in all sets, this way each sample outside the training set had a high likelihood of having a sample in the training set that shared many features, since it is the same person. However, now the actors on the training set are not the same as the ones on the validation and test sets, so we start to rely on inherent features of men and women to make the classification, which poses as a harder task, evidenced by how the performance changed from \autoref{t5:k_test} to \autoref{t6:k_test}.
 
 \clearpage
 \end{homeworkProblem}

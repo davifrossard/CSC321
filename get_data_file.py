@@ -1,18 +1,16 @@
-from random import seed, shuffle
-from multiprocessing import Pool, TimeoutError
+from multiprocessing import Pool
 from socket import timeout
 from hashlib import sha256
 from scipy.misc import imread, imsave
 from glob import glob
-from scipy.misc import imresize
 from io import BytesIO
 import sys
 import urllib2
 import os
 
-i = 0
 
-def process_item(item, dtimeout=3):
+
+def process_item(item, dtimeout=1):
     try:
         # Extract useful data from line
         name = item[0]
@@ -46,9 +44,8 @@ def process_item(item, dtimeout=3):
             return 0
 
         # Crop face and save as greyscale
-        imarray = imread(BytesIO(image_data), 1)
+        imarray = imread(BytesIO(image_data))
         face = imarray[facecoord[1]:facecoord[3], facecoord[0]:facecoord[2]]
-        face = imresize(face, (32, 32))
         imsave("cropped/" + filename, face)
 
         # Everything went as expected
@@ -62,7 +59,7 @@ def process_item(item, dtimeout=3):
         return 0
 
 
-def fetch_data_files(source, targets, amount, numthreads=10, threadtimeout=3):
+def fetch_data_files(source, targets, amount, numthreads=10, threadtimeout=1):
     data_lines = list([a.split("\t") for a in open(source).readlines()])
     pool = Pool(processes=numthreads)
     total_sucess = 0;
@@ -113,10 +110,17 @@ def fetch_data_files(source, targets, amount, numthreads=10, threadtimeout=3):
         print "\nDownloaded %d image[s] of %s" % (imsuccess, target)
         total_sucess += imsuccess
 
+    pool.close()
+
     return total_sucess
 
 
-def fetch_data(source, targets, amount, numthreads=10, threadtimeout=3):
+def fetch_actors(source):
+    data_lines = list([a.split("\t") for a in open(source).readlines()])
+    return set([data[0] for data in data_lines])
+
+
+def fetch_data(source, targets, amount, numthreads=10, threadtimeout=1):
     faces = []
     for target in targets:
         tfaces = sorted(glob("cropped/" + target + "/*"))

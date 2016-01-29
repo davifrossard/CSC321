@@ -109,4 +109,3 @@ def fetch_data(source, targets, amount, numthreads=10, threadtimeout=3):
         actors.extend(tactors)
 
     return total_success, photos, faces, actors
-

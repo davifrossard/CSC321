@@ -1,7 +1,14 @@
 from get_data_file import *
+from numpy import dot
 from numpy import shape
 
-def fetch_sets(source, actors, train=100, validation=10, test=10):
+
+
+def rgb2gray(image):
+    return dot(image[...,:3], [0.299, 0.587, 0.114])
+
+
+def fetch_sets(source, actors, train=100, validation=10, test=10, invert=False):
     x_train = []
     x_validation = []
     x_test = []
@@ -10,6 +17,10 @@ def fetch_sets(source, actors, train=100, validation=10, test=10):
     t_validation = []
     t_test = []
     total = train+validation+test
+
+    if invert:
+        list_actors = fetch_actors(source)
+        actors = [actor for actor in list_actors if actor not in actors]
 
     for actor in actors:
         faces = fetch_data(source, [actor], train+validation+test)

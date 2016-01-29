@@ -1,4 +1,4 @@
-from part2 import fetch_sets
+from part2 import fetch_sets, rgb2gray
 from k_nearest_neighbors import knn_classify
 from distance_functions import euclidean_distance
 from scipy.misc import imresize
@@ -14,7 +14,7 @@ if len(sys.argv) == 3:
     save_ext = sys.argv[1]
     plot_graphs = (sys.argv[2] == '1')
 else:
-    save_ext = 'eps'
+    save_ext = 'pdf'
     plot_graphs = False
 
 plt.gray()
@@ -34,11 +34,9 @@ t_validation = np.array(t_validation_f + t_validation_m)
 x_test = x_test_f + x_test_m
 t_test = np.array(t_test_f + t_test_m)
 
-min_dim = min(map(np.shape, x_train+x_validation+x_test))
-
-x_train = np.array([np.hstack(imresize(x, (32,32))) for x in x_train])
-x_validation = np.array([np.hstack(imresize(x, (32,32))) for x in x_validation])
-x_test = np.array([np.hstack(imresize(x, (32,32))) for x in x_test])
+x_train = [rgb2gray(imresize(x, (32,32))) for x in x_train]
+x_validation = [rgb2gray(imresize(x, (32,32))) for x in x_validation]
+x_test = [rgb2gray(imresize(x, (32,32))) for x in x_test]
 
 krange = [i for j in (range(1,10), range(11, len(x_train),10), [len(x_train)]) for i in j]
 train_errors = np.zeros(len(krange))

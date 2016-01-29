@@ -1,4 +1,4 @@
-from part2 import fetch_sets
+from part2 import fetch_sets, rgb2gray
 from k_nearest_neighbors import knn_classify
 from distance_functions import euclidean_distance
 from scipy.misc import imresize
@@ -14,7 +14,7 @@ if len(sys.argv) == 3:
     save_ext = sys.argv[1]
     plot_graphs = (sys.argv[2] == '1')
 else:
-    save_ext = 'eps'
+    save_ext = 'pdf'
     plot_graphs = False
 
 plt.gray()
@@ -25,8 +25,8 @@ os.makedirs("results/part_6/k_sweep")
 x_train_f = fetch_sets("subset_actresses.txt", ['Lorraine Bracco', 'Peri Gilpin', 'Angie Harmon'], 100, 0, 0)[0]
 x_train_m = fetch_sets("subset_actors.txt", ['Gerard Butler', 'Daniel Radcliffe', 'Michael Vartan'], 100, 0, 0)[0]
 
-_, _, x_validation_f, _, x_test_f, _ = fetch_sets("subset_actresses.txt", ['Carmen Electra', 'Kim Cattrall', 'Loni Anderson'], 0, 10, 10)
-_, _, x_validation_m, _, x_test_m, _ = fetch_sets("subset_actors.txt", ['Chris Klein', 'Leonardo DiCaprio', 'Jason Statham'], 0, 10, 10)
+_, _, x_validation_f, _, x_test_f, _ = fetch_sets("subset_actresses.txt", ['Lorraine Bracco', 'Peri Gilpin', 'Angie Harmon'], 0, 20, 20, True)
+_, _, x_validation_m, _, x_test_m, _ = fetch_sets("subset_actors.txt", ['Gerard Butler', 'Daniel Radcliffe', 'Michael Vartan'], 0, 20, 20, True)
 
 genders = ['Male', 'Female']
 x_train = x_train_f + x_train_m
@@ -38,11 +38,9 @@ t_validation = np.hstack((np.ones(len(x_validation_f)), np.zeros(len(x_validatio
 x_test = x_test_f + x_test_m
 t_test = np.hstack((np.ones(len(x_test_f)), np.zeros(len(x_test_m))))
 
-min_dim = min(map(np.shape, x_train+x_validation+x_test))
-
-x_train = np.array([np.hstack(imresize(x, (32,32))) for x in x_train])
-x_validation = np.array([np.hstack(imresize(x, (32,32))) for x in x_validation])
-x_test = np.array([np.hstack(imresize(x, (32,32))) for x in x_test])
+x_train = [rgb2gray(imresize(x, (32,32))) for x in x_train]
+x_validation = [rgb2gray(imresize(x, (32,32))) for x in x_validation]
+x_test = [rgb2gray(imresize(x, (32,32))) for x in x_test]
 
 krange = [i for j in (range(1,10), range(11, len(x_train),10), [len(x_train)]) for i in j]
 train_errors = np.zeros(len(krange))
