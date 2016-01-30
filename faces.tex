@@ -192,7 +192,7 @@
 
 \begin{homeworkProblem}
 
-The dataset consists of 3167 links to pictures of 15 actors and 3169 links to picture of 15 actresses, each photo and face is uniquely identified and contains the coordinates for the face on the picture. The dimensions of the pictures vary considerably and some links are broken or have corrupted images.
+The data-set consists of 3167 links to pictures of 15 actors and 3169 links to picture of 15 actresses, each photo and face is uniquely identified and contains the coordinates for the face on the picture. Although having different ids, not all faces are unique, as there are repeated photos throughout the data-set. The dimensions of the pictures vary considerably and some links are broken or have corrupted images.
 
 \begin{figure}[H]
     \centering
@@ -273,7 +273,7 @@ To produce the train, validation and test sets we first invoke a function to dow
 \begin{homeworkProblem}
 \label{t3}
 
-Given a face we want to determine the actor portrayed, to do that we use \textit{K}-Nearest Neighbors. First we have to determine the optimum value of nearest neighbors to consider (\textit{K}). We first sweep values from 1 to the size of the datasets, which returns \autoref{t3:k_sens}. We then select the values of \textit{K} that gives the better results (\autoref{t3:k_eval}) and test it against the test set, which gives us \autoref{t3:k_test}.
+Given a face we want to determine the actor portrayed, to do that we use \textit{K}-Nearest Neighbors. First we have to determine the optimum value of nearest neighbors to consider (\textit{K}). We first sweep values from 1 to the size of the data-sets, which returns \autoref{t3:k_sens}. We then select the values of \textit{K} that gives the better results (\autoref{t3:k_eval}) and test it against the test set, which gives us \autoref{t3:k_test}.
 
 \begin{figure}[H]
     \centering

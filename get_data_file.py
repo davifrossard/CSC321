@@ -1,7 +1,7 @@
 from multiprocessing import Pool
 from socket import timeout
 from hashlib import sha256
-from scipy.misc import imread, imsave
+from scipy.misc import imread, imsave, imresize
 from glob import glob
 from io import BytesIO
 import sys
@@ -46,6 +46,7 @@ def process_item(item, dtimeout=1):
         # Crop face and save as greyscale
         imarray = imread(BytesIO(image_data))
         face = imarray[facecoord[1]:facecoord[3], facecoord[0]:facecoord[2]]
+        face = imresize(face, (100,100))
         imsave("cropped/" + filename, face)
 
         # Everything went as expected
@@ -123,10 +124,10 @@ def fetch_actors(source):
 def fetch_data(source, targets, amount, numthreads=10, threadtimeout=1):
     faces = []
     for target in targets:
-        tfaces = sorted(glob("cropped/" + target + "/*"))
+        tfaces = sorted(set(glob("cropped/" + target + "/*")))
         if len(tfaces) < amount:
             fetch_data_files(source, [target], amount - len(tfaces), numthreads, threadtimeout)
-            tfaces = glob("cropped/" + target + "/*")
+            tfaces = sorted(set(glob("cropped/" + target + "/*")))
         for i in range(len(tfaces)):
             faces.append(imread(tfaces[i]))
     return faces

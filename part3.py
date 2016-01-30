@@ -39,8 +39,8 @@ t_validation = np.array(t_validation_f + t_validation_m)
 x_test = x_test_f + x_test_m
 t_test = np.array(t_test_f + t_test_m)
 
-xto = np.array(x_train)
-xteo = np.array(x_test)
+xto = x_train
+xteo = x_test
 
 x_train = [rgb2gray(imresize(x, (32,32))) for x in x_train]
 x_validation = [rgb2gray(imresize(x, (32,32))) for x in x_validation]
@@ -74,19 +74,20 @@ for j, k in enumerate(best_k):
             test_errors[j] += 1
 
             if trigger % 2 == 0:
-                _, nn = knn_classify(x_train, t_train, xi, 5, euclidean_distance, test_distances[i])
+                _, nn = knn_classify(x_train, t_train, xi, 6, euclidean_distance, test_distances[i])
                 plt.suptitle("%s (K=%d)" %(t_test[i], k), size=20)
                 plt.subplot(1,2,1)
                 plt.imshow(xteo[i])
-                plt.title(ti, color='red')
+                plt.title(ti, color='red', weight='bold')
                 plt.axis('off')
-                for n, m in enumerate([3,4,7,8,11]):
+                for n, m in enumerate([3,4,7,8,11,12]):
                     plt.subplot(3,4,m)
                     plt.imshow(xto[nn[n]])
+                    wght = 'bold' if n < k else 'normal'
                     if t_train[nn[n]] != t_test[i]:
-                        plt.title(t_train[nn[n]], color='red')
+                        plt.title(t_train[nn[n]], color='red', weight=wght)
                     else:
-                        plt.title(t_train[nn[n]], color='green')
+                        plt.title(t_train[nn[n]], color='green', weight=wght)
                     plt.axis('off')
                 plt.savefig('results/part_3/mislabels/%d.%s' %(nl, save_ext), bbox_inches='tight')
                 nl+=1
