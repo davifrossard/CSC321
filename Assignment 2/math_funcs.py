@@ -30,10 +30,7 @@ def drelu(x):
 
 # --------------------------------------------
 def cross_entropy(x, w, b, funcs, y):
-    xents = []
-    activations = feed_forward(x, w, b, funcs)[1]
-    for activation in activations:
-        xents.append(np.sum(np.maximum(activation, 0) - y * activation + np.log(1 + np.exp(-np.abs(activation))),axis=0)/len(y))
-    return xents
+    activation = (feed_forward(x, w, b, funcs)[1])[-1]
+    return np.sum(np.maximum(activation, 0) - y * activation + np.log(1 + np.exp(-np.abs(activation))),axis=0)/len(y)
 
 
