@@ -1,5 +1,5 @@
 import numpy as np
-
+from part2 import feed_forward
 
 # --------------------------------------------
 def softmax(x):
@@ -29,8 +29,11 @@ def drelu(x):
 
 
 # --------------------------------------------
-def cross_entropy(x, w, b, y):
-    logit = x.dot(w)+b
-    return np.sum(np.maximum(logit, 0) - y * logit + np.log(1 + np.exp(-np.abs(logit))),axis=0)/len(y)
+def cross_entropy(x, w, b, funcs, y):
+    xents = []
+    activations = feed_forward(x, w, b, funcs)[1]
+    for activation in activations:
+        xents.append(np.sum(np.maximum(activation, 0) - y * activation + np.log(1 + np.exp(-np.abs(activation))),axis=0)/len(y))
+    return xents
 
 
