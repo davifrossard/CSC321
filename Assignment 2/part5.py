@@ -17,8 +17,9 @@ def backpropagate_momentum_step(x, w, b, y, rate, momentum, batch_size):
 
 def evaluate_accuracy(x, w, b, y):
     output = feed_forward(x, [w], [b], [softmax])[0]
-    accuracy = np.sum(np.equal(np.argmax(output, 1), np.argmax(y, 1)))
-    return accuracy.astype('float32')/len(y)
+    matches = np.where(np.equal(np.argmax(output, 1), np.argmax(y, 1)) == True)[0]
+    accuracy = np.sum(matches).astype('float32')/len(y)
+    return accuracy, matches, np.argmax(output, 1)
 
 def evaluate_cost(x, w, b, y):
     cost = cross_entropy(x, [w], [b], [softmax], y)
