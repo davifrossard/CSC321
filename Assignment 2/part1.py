@@ -53,6 +53,6 @@ def load_mnist_mat(file, plot=False, save_ext='pdf'):
             classes.append(i)
     images = np.array(images)
     classes = to_one_hot(classes)
-    plt.savefig('results/part_1/digit_samples.%s' %(save_ext), bbox_inches='tight')
+    plt.savefig('results/part1.%s' %(save_ext), bbox_inches='tight')
     plt.show() if plot else plt.close()
     return images, classes
