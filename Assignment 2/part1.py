@@ -10,6 +10,8 @@ def make_sets(data, classes, train=1500, validation=1000):
     source = zip(data, classes)
     np.random.shuffle(source)
     data, classes = zip(*source)
+    data = np.array(np.array(data).astype('float32')/np.max(data))
+    classes = np.array(classes)
 
     x_train = data[:train]
     t_train = classes[:train]
@@ -39,7 +41,6 @@ def load_mnist_mat(file, plot=False, save_ext='pdf'):
         shutil.rmtree("results/part_1")
     os.makedirs("results/part_1")
     data = loadmat(file)
-    plt.figure()
     plt.gray()
     plt.suptitle('Digit Samples', size=20)
     for i in range(10):
