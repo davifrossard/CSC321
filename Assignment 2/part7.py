@@ -30,10 +30,27 @@ def dCost_dWeight1(x, w, b, y):
     m = len(y)
 
     z1 = x.dot(w1) + b1
-    z2 = z1.dot(w2) + b2
+    a1 = tanh(z1)
+    z2 = a1.dot(w2) + b2
 
     delta2 = (softmax(z2)-y)
 
     delta1 = np.dot(delta2, w2.T) * dtanh(z1)
     dcdw1 = np.dot(x.T, delta1)
     return (1.0/m)*dcdw1
+
+
+def dCost_dBias1(x, w, b, y):
+    w2, b2 = w[1], b[1]
+    w1, b1 = w[0], b[0]
+    m = len(y)
+
+    z1 = x.dot(w1) + b1
+    a1 = tanh(z1)
+    z2 = a1.dot(w2) + b2
+
+    delta2 = (softmax(z2)-y)
+
+    delta1 = np.dot(delta2, w2.T) * dtanh(z1)
+    dcdb1 = np.sum(delta1, axis=0)
+    return (1.0/m)*dcdb1
