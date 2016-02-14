@@ -3,11 +3,14 @@ from part2 import feed_forward
 
 # --------------------------------------------
 def softmax(x):
-    return 1 / (1 + np.exp(-x))
+    e = np.exp(x)
+    sum = np.exp(x).sum(axis=1)
+    return e / sum[:,None]
 
 
 def dsoftmax(x):
-    return softmax(x) * (1 - softmax(x))
+    y = softmax(x)
+    return y*(1-y)
 
 
 # --------------------------------------------
@@ -30,7 +33,7 @@ def drelu(x):
 
 # --------------------------------------------
 def cross_entropy(x, w, b, funcs, y):
-    activation = (feed_forward(x, w, b, funcs)[1])[-1]
-    return np.sum(np.maximum(activation, 0) - y * activation + np.log(1 + np.exp(-np.abs(activation))),axis=0)/len(y)
-
+    output = feed_forward(x, w, b, funcs)[0]
+    xent = -np.sum(y*np.log(output))
+    return (1.0/len(y)) * xent
 
