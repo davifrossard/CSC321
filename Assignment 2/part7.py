@@ -32,12 +32,14 @@ def dCost_dWeight1(x, w, b, y):
     z1 = x.dot(w1) + b1
     a1 = tanh(z1)
     z2 = a1.dot(w2) + b2
+    a2 = softmax(z2)
 
-    delta2 = (softmax(z2)-y)
+    delta2 = (a2-y)
 
     delta1 = np.dot(delta2, w2.T) * dtanh(z1)
-    dcdw1 = np.dot(x.T, delta1)
-    return (1.0/m)*dcdw1
+
+    grad_weight1 = (1.0/m) * np.dot(x.T, delta1)
+    return grad_weight1
 
 
 def dCost_dBias1(x, w, b, y):
