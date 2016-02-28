@@ -1,16 +1,20 @@
+import csv
 from copy import deepcopy
-
 from part7 import *
 from math_funcs import *
 
-def compare_gradient2(x, w, b, y, delta=1e-10, numpoints=3):
-    np.random.seed(0)
+def compare_gradient2(x, w, b, y, delta=1e-10, numpoints=4):
+    np.random.seed(10)
     print "----------------------------------"
     print "Evaluating Gradients of 2nd Layer:"
     print "----------------------------------"
 
-    idw = zip(np.random.choice(len(w[1]), numpoints), np.random.choice(len(w[1][0]), numpoints))
-    idb = np.random.choice(len(b[1]), numpoints)
+    gradw = dCost_dWeight2(x, w, b, y)
+    gradb = dCost_dBias2(x, w, b, y)
+    idw = [(ix/10, ix%10) for ix in (-abs(gradw)).flatten().argsort()[:numpoints]]
+    idb = (-abs(gradb)).flatten().argsort()[:4]
+    gradb = gradb[idb]
+    gradw = gradw[zip(*idw)]
 
     gradsw, gradsb = np.zeros(numpoints), np.zeros(numpoints)
     b2 = cross_entropy(x, w, b, [tanh, softmax], y)
@@ -24,7 +28,7 @@ def compare_gradient2(x, w, b, y, delta=1e-10, numpoints=3):
         b1 = cross_entropy(x, wl, b, [tanh, softmax], y)
         gradsw[k] = (b1-b2)/delta
 
-    gradw = dCost_dWeight2(x, w, b, y)[zip(*idw)]
+
     print "Gradient:",gradw
     print "Finite Differences:",gradsw
     print "Error:", gradw-gradsw,"\n"
@@ -38,30 +42,43 @@ def compare_gradient2(x, w, b, y, delta=1e-10, numpoints=3):
         b1 = cross_entropy(x, w, bl, [tanh, softmax], y)
         gradsb[k] = (b1-b2)/delta
 
-    gradb = dCost_dBias2(x, w, b, y)[idb]
     print "Bias Gradient:",gradb
     print "Finite Differences:",gradsb
     print "Error:", gradb-gradsb
+
+    with open('results/part8_weight_2nd.out', 'w') as fl:
+        fl.write("Entries:            "+', '.join(format(str(x), "^10s") for x in idw)+"\n")
+        fl.write("Gradient:           "+', '.join(format(x, "10.7f") for x in gradw)+"\n")
+        fl.write("Finite Differences: "+', '.join(format(x, "10.7f") for x in gradsw)+"\n")
+        fl.write("Error:              "+', '.join(format(x, "10.7f") for x in gradw-gradsw)+"\n")
+
+
+    with open('results/part8_bias_2nd.out', 'w') as fl:
+        fl.write("Entries:            "+', '.join(format(str(x), "^10s") for x in idb)+"\n")
+        fl.write("Gradient:           "+', '.join(format(x, "10.7f") for x in gradb)+"\n")
+        fl.write("Finite Differences: "+', '.join(format(x, "10.7f") for x in gradsb)+"\n")
+        fl.write("Error:              "+', '.join(format(x, "10.7f") for x in gradb-gradsb)+"\n")
 
     print "----------------------------------"
     print "Evaluating Gradients of 1st Layer:"
     print "----------------------------------"
 
-    idw = zip(np.random.choice(len(w[0]), numpoints), np.random.choice(len(w[0][0]), numpoints))
-    idb = np.random.choice(len(b[0]), numpoints)
-
+    gradw = dCost_dWeight1(x, w, b, y)
+    gradb = dCost_dBias1(x, w, b, y)
+    idw = [(ix/300, ix%300) for ix in (-abs(gradw)).flatten().argsort()[:numpoints]]
+    idb = (-abs(gradb)).flatten().argsort()[:numpoints]
+    gradb = gradb[idb]
+    gradw = gradw[zip(*idw)]
     gradsw, gradsb = np.zeros(numpoints), np.zeros(numpoints)
 
-    print "Evaluating gradient for weights", idw
     for k, index in enumerate(idw):
         wl = deepcopy(w)
-        i,j = 350,164
 
-        wl[0][i][j] += delta
+        wl[0][index] += delta
         b1 = cross_entropy(x, wl, b, [tanh, softmax], y)
         gradsw[k] = (b1-b2)/delta
 
-    gradw = dCost_dWeight1(x, w, b, y)[zip(*idw)]
+    print "Evaluating gradient for weights", idw
     print "Gradient:",gradw
     print "Finite Differences:",gradsw
     print "Error:", gradw-gradsw,"\n"
@@ -73,10 +90,22 @@ def compare_gradient2(x, w, b, y, delta=1e-10, numpoints=3):
         b1 = cross_entropy(x, w, bl, [tanh, softmax], y)
         gradsb[k] = (b1-b2)/delta
 
-    gradb = dCost_dBias1(x, w, b, y)[idb]
 
     print "Evaluating gradient for bias", idb
     print "Bias Gradient:",gradb
     print "Finite Differences:",gradsb
     print "Error:", gradb-gradsb
 
+
+    with open('results/part8_weight_1st.out', 'w') as fl:
+        fl.write("Entries:            "+', '.join(format(str(x), "^10s") for x in idw)+"\n")
+        fl.write("Gradient:           "+', '.join(format(x, "10.7f") for x in gradw)+"\n")
+        fl.write("Finite Differences: "+', '.join(format(x, "10.7f") for x in gradsw)+"\n")
+        fl.write("Error:              "+', '.join(format(x, "10.7f") for x in gradw-gradsw)+"\n")
+
+
+    with open('results/part8_bias_1st.out', 'w') as fl:
+        fl.write("Entries:            "+', '.join(format(str(x), "^10s") for x in idb)+"\n")
+        fl.write("Gradient:           "+', '.join(format(x, "10.7f") for x in gradb)+"\n")
+        fl.write("Finite Differences: "+', '.join(format(x, "10.7f") for x in gradsb)+"\n")
+        fl.write("Error:              "+', '.join(format(x, "10.7f") for x in gradb-gradsb)+"\n")
