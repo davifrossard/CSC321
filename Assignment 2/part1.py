@@ -37,17 +37,14 @@ def to_one_hot(data):
 def load_mnist_mat(file, plot=False, save_ext='pdf'):
     images = []
     classes = []
-    if os.path.exists("results/part_1"):
-        shutil.rmtree("results/part_1")
-    os.makedirs("results/part_1")
     data = loadmat(file)
     plt.gray()
     plt.suptitle('Digit Samples', size=20)
     for i in range(10):
-        plt.subplot(3,4,i+1)
-        plt.imshow(data['train%d'%(i)][0].reshape((28,28)))
-        plt.title(i)
-        plt.axis('off')
+        for j in range(10):        
+            plt.subplot(10,10,i*10+j+1)
+            plt.imshow(data['train%d'%(i)][j].reshape((28,28)))
+            plt.axis('off')
         for image in data['train%d'%(i)]:
             images.append(image)
             classes.append(i)
