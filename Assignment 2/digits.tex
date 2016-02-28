@@ -1,0 +1,547 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Programming/Coding Assignment
+% LaTeX Template
+%
+% This template has been downloaded from:
+% http://www.latextemplates.com
+%
+% Original author:
+% Ted Pavlic (http://www.tedpavlic.com)
+%
+% Note:
+% The \lipsum[#] commands throughout this template generate dummy text
+% to fill the template out. These commands should all be removed when 
+% writing assignment content.
+%
+% This template uses a Perl script as an example snippet of code, most other
+% languages are also usable. Configure them in the "CODE INCLUSION 
+% CONFIGURATION" section.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{bm}
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{listings} % Required for insertion of code
+\usepackage{courier} % Required for the courier font
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+\usepackage{pgfplotstable} % Import csv data
+\usepackage{amsmath} % Math equation tools
+\usepackage{hyperref} % Create references\pgfplotsset{compat=1.12}
+\usepackage{filecontents}% Used so that the external files can be placed in this file
+\usepackage{pgf} % Loops in latex
+\usepackage{bookmark}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{siunitx} % Formats the units and values
+
+% Setup siunitx:
+\sisetup{
+  round-mode          = places, % Rounds numbers
+  round-precision     = 4, % to 2 places
+}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+\renewcommand{\tableautorefname}{Table}
+\renewcommand{\lstlistingname}{Code}
+\renewcommand{\equationautorefname}{Eq.}
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkClass\ (\hmwkClassTime): \hmwkTitle} % Top center head
+%\rhead{\firstxmark} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\DeclareGraphicsExtensions{.eps,.pdf,.png,.jpg,.jpeg}
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+%----------------------------------------------------------------------------------------
+%	CODE INCLUSION CONFIGURATION
+%----------------------------------------------------------------------------------------
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{Python} % Load Perl syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=Python, % Use Perl in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}\bf, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers                                         
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=2, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=1  % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\perlscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1]{#1.pl}
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+%\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+%\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+%\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+%\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{0} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+\setcounter{homeworkProblemCounter}{0}
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Part \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\def\sectionautorefname{Part}
+\refstepcounter{homeworkProblemCounter}%
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+\noindent\framebox[\columnwidth][c]{\begin{minipage}{0.98\columnwidth}#1\end{minipage}} % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Assignment 2} % Assignment title
+\newcommand{\hmwkDueDate}{Friday,\ February\ 26,\ 2016} % Due date
+\newcommand{\hmwkClass}{CSC321} % Course/class
+\newcommand{\hmwkClassTime}{L0101} % Class/lecture time
+\newcommand{\hmwkAuthorName}{Davi Frossard} % Your name
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+\normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
+\vspace{0.1in}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+%\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+\clearpage
+
+
+%----------------------------------------------------------------------------------------
+%	PART 1
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part1}
+
+Plotting a random sample of each digit in the dataset we obtain the images depicted in \autoref{fig:task1_digits}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{results/part1}
+    \caption{Samples of digits in dataset.}
+    \label{fig:task1_digits}
+\end{figure}
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	PART 2
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part2}
+
+To implement feedforward we use the routine implemented with \autoref{lst:task2_ff}. It can be used with any MLP architecture.
+
+\lstinputlisting[language=Python,
+    linerange={3-19},
+    caption={Feedforward Routine.},
+    label={lst:task2_ff}]{part2.py}
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	PART 3
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part3}
+
+The gradient for the neural network proposed is implemented with \autoref{lst:task3_grad}. The mathematical deductions for it are presented in \autoref{part7}.
+
+\lstinputlisting[language=Python,
+    linerange={5-19},
+    caption={Gradient Implementation.},
+    label={lst:task3_grad}]{part3.py}
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	PART 4
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part4}
+
+In order to validate the gradients in \autoref{part3} we evaluate them using finite differences in some weights, using a delta of 1e-5, as shown in \autoref{lst:task4_fd}. With this settings we obtain the results shown in \autoref{lst:task4_fdw} and \autoref{lst:task4_fdb}.
+
+\lstinputlisting[language=Python,
+    caption={Gradient evaluation with finite differences.},
+    linerange={5-45},
+    label={lst:task4_fd}]{part4.py}
+    
+\lstinputlisting[language=Python,
+    caption={Weight gradient evaluation with finite differences.},
+    label={lst:task4_fdw}]{results/part4_weight.out}
+   
+\lstinputlisting[language=Python,
+    caption={Bias gradient evaluation with finite differences.},
+    label={lst:task4_fdb}]{results/part4_bias.out}
+    
+   
+We notice that the error is orders of magnitude smaller than the derivative values both with the gradient and finite differences, therefore the model is validated.
+     
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+%	PART 5
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part5}
+
+We train the neural network using stochastic gradient descent with momentum with a learning rate of 0.05, momentum of 1 and mini-batches with 50 samples. We also use early stopping to avoid overfitting. With these settings we obtain the training curves depicted in \autoref{fig:p5_cost} and \autoref{fig:p5_accuracy} and final benchmarks shown in \autoref{tab:task5_best}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{results/part5_cost}
+    \caption{Log likelihood cost for each epoch.}
+    \label{fig:p5_cost}
+\end{figure}
+   
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{results/part5_accuracy}
+    \caption{Model accuracy for each epoch.}
+    \label{fig:p5_accuracy}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\pgfplotstabletypeset[
+    col sep=comma,
+    string type,
+    display columns/0/.style={column name=\textbf{Log-Likelihood Cost}, column type={|S|}},
+    display columns/1/.style={column name=\textbf{Accuracy (\%)}, column type={S|}},
+    every head row/.style={before row=\hline,after row=\hline},
+    every last row/.style={after row=\hline},
+    ]{results/part5.csv}
+\caption{Evaluation of the model on test set.}
+\label{tab:task5_best}
+\end{table}
+
+With this model we obtain the success cases shown in \autoref{fig:p5_success} and failure cases shown in \autoref{fig:p5_fail}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{results/part5_successes}
+    \caption{Success cases of the model.}
+    \label{fig:p5_success}
+\end{figure}
+   
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{results/part5_failures}
+    \caption{Failure cases of the model.}
+    \label{fig:p5_fail}
+\end{figure}
+     
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+%	PART 6
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part6}
+
+If we plot the weights obtained after training the model we obtain the heatmap depicted in \autoref{fig:p6_weights}. We can see that the positive weights look similar to how we expect the number to look like in most cases (notably 0 and 3). On the other hand the negative weights appear to be an overlay of all other digits as a way to reinforce the confidence in the classification.
+   
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{results/part6}
+    \caption{Weight visualization.}
+    \label{fig:p6_weights}
+\end{figure}
+     
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	PART 7
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part7}
+
+We use the implementation of the gradient shown in \autoref{lst:task7_grad}
+   
+\lstinputlisting[language=Python,
+    linerange={5-100},
+    caption={Gradient Implementation.},
+    label={lst:task7_grad}]{part7.py}
+     
+Let us denote by $\bm{Z}_i$ the pre activation of layer $i$, that is: $\bm{Z}_i = \bm{X}_i \cdot \bm{W}_{i} + \bm{B}_i$ and by $\bm{A}_i$ the activation of layer $i$, i.e. $\bm{A}_i = f(\bm{Z}_i)$. Moreover, an index $i=2$ denotes the softmax layer; $i=1$ denotes the tanh layer. We start by deducting the gradient with respect to the weights of the second layer with \autoref{eq:grad_w2}.
+
+\begin{equation}
+\label{eq:grad_w2}
+\begin{aligned}
+\frac{\delta \bm{E}}{\delta \bm{W}_2} 
+& = \frac{\delta \bm{E}}{\delta \bm{Z}_2} \frac{\delta \bm{Z}_2}{\delta \bm{W}_2}\\
+& = \left(\sigma(\bm{Z}_2) - \bm{Y}\right) \frac{\delta \bm{Z}_2}{\delta \bm{W}_2}\\
+& =  \bm{A}_2^T \cdot \left(\sigma(\bm{Z}_2) - \bm{Y}\right)\\
+\end{aligned}
+\end{equation}
+
+Similarly, for the biases of the second layer we have \autoref{eq:grad_b2}.
+\begin{equation}
+\label{eq:grad_b2}
+\begin{aligned}
+\frac{\delta \bm{E}}{\delta \bm{B}_2} 
+& = \frac{\delta \bm{E}}{\delta \sigma(\bm{Z}_2)} \frac{\delta \sigma(\bm{Z}_2)}{\delta \bm{Z}_2} \frac{\delta \bm{Z}_2}{\delta \bm{B}_2}\\
+& = \left(\sigma(\bm{Z}_2) - \bm{Y}\right) \frac{\delta \bm{Z}_2}{\delta \bm{B}_2}\\
+& = \left(\sigma(\bm{Z}_2) - \bm{Y}\right)\\
+\end{aligned}
+\end{equation}
+
+We now expand to the first layer, starting with the weights with \autoref{eq:grad_w1}. We denote the Hadamard product with $\star$.
+\begin{equation}
+\label{eq:grad_w1}
+\begin{aligned}
+\frac{\delta \bm{E}}{\delta \bm{W}_1} 
+& = \frac{\delta \bm{E}}{\delta \bm{Z}_2} \frac{\delta \bm{Z}_2}{\delta \bm{W}_2} \frac{\delta \bm{W}_2}{\delta \bm{A}_1} \frac{\delta \bm{A}_1}{\delta \bm{Z}_1} \frac{\delta \bm{Z}_1}{\delta \bm{W}_1}\\
+& = \left(\sigma(\bm{Z}_2) - \bm{Y}\right) \frac{\delta \bm{W}_2}{\delta \bm{A}_1} \frac{\delta \bm{A}_1}{\delta \bm{Z}_1} \frac{\delta \bm{Z}_1}{\delta \bm{W}_1}\\
+& = \left(\sigma(\bm{Z}_2) - \bm{Y}\right) \cdot \bm{W}_2^T \frac{\delta \bm{A}_1}{\delta \bm{Z}_1} \frac{\delta \bm{Z}_1}{\delta \bm{W}_1} \\
+& = \left(\sigma(\bm{Z}_2) - \bm{Y}\right) \cdot \bm{W}_2^T \star tanh'(\bm{Z}_1) \frac{\delta \bm{Z}_1}{\delta \bm{W}_1} \\
+& = \bm{X}^T \cdot \left(\left(\sigma(\bm{Z}_2) - \bm{Y}\right) \cdot \bm{W}_2^T \star tanh'(\bm{Z}_1)\right) \\
+\end{aligned}
+\end{equation}
+
+And for the biases, we have \autoref{eq:grad_b1}.
+\begin{equation}
+\label{eq:grad_b1}
+\begin{aligned}
+\frac{\delta \bm{E}}{\delta \bm{B}_1} 
+& = \frac{\delta \bm{E}}{\delta \bm{Z}_2} \frac{\delta \bm{Z}_2}{\delta \bm{A}_1} \frac{\delta \bm{A}_1}{\delta \bm{Z}_1} \frac{\delta \bm{Z}_1}{\delta \bm{B}_1} \\
+& = \left(\sigma(\bm{Z}_2) - \bm{Y}\right) \cdot \bm{W}_2^T \star tanh'(\bm{Z}_1) \frac{\delta \bm{Z}_1}{\delta \bm{B}_1} \\
+& = \left(\sigma(\bm{Z}_2) - \bm{Y}\right) \cdot \bm{W}_2^T \star tanh'(\bm{Z}_1) \\
+\end{aligned}
+\end{equation}
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	PART 8
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part7}
+
+Following a procedure similar to that of \autoref{part4}, we have the method shown in 
+
+\lstinputlisting[language=Python,
+    caption={Gradient evaluation with finite differences.},
+    linerange={6-48,61-97},
+    label={lst:task8_fd}]{part8.py}
+    
+\lstinputlisting[language=Python,
+    caption={2nd layer weights gradient evaluation with finite differences.},
+    label={lst:task8_fdw}]{results/part8_weight_2nd.out}
+   
+\lstinputlisting[language=Python,
+    caption={2nd layer bias gradient evaluation with finite differences.},
+    label={lst:task8_fdb}]{results/part8_bias_2nd.out}
+    
+\lstinputlisting[language=Python,
+    caption={1st layer weights gradient evaluation with finite differences.},
+    label={lst:task8_fdw}]{results/part8_weight_1st.out}
+\clearpage
+\lstinputlisting[language=Python,
+    caption={1st layer bias gradient evaluation with finite differences.},
+    label={lst:task8_fdb}]{results/part8_bias_1st.out}
+     
+We notice that the error is again orders of magnitude smaller than the derivative values both with the gradient and finite differences, therefore the model is validated.
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+%	PART 9
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part9}
+
+Similarly to \autoref{part5}, we use stochastic gradient descent with momentum but now with a learning rate of 0.01, momentum of 0.05 and mini-batches with 50 samples. We still use early stopping, however it was not triggered. With these settings we obtain the training curves depicted in \autoref{fig:p9_cost} and \autoref{fig:p9_accuracy} and final benchmarks shown in \autoref{tab:task9_best}.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{results/part9_cost}
+    \caption{Log likelihood cost for each epoch.}
+    \label{fig:p9_cost}
+\end{figure}
+   
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{results/part9_accuracy}
+    \caption{Model accuracy for each epoch.}
+    \label{fig:p9_accuracy}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\pgfplotstabletypeset[
+    col sep=comma,
+    string type,
+    display columns/0/.style={column name=\textbf{Log-Likelihood Cost}, column type={|S|}},
+    display columns/1/.style={column name=\textbf{Accuracy (\%)}, column type={S|}},
+    every head row/.style={before row=\hline,after row=\hline},
+    every last row/.style={after row=\hline},
+    ]{results/part9.csv}
+\caption{Evaluation of the model on test set.}
+\label{tab:task9_best}
+\end{table}
+
+With this model we obtain the success cases shown in \autoref{fig:p9_success} and failure cases shown in \autoref{fig:p9_fail}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{results/part9_successes}
+    \caption{Success cases of the model.}
+    \label{fig:p9_success}
+\end{figure}
+   
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{results/part9_failures}
+    \caption{Failure cases of the model.}
+    \label{fig:p9_fail}
+\end{figure}
+     
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	PART 10
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part10}
+
+We plot the weights of some of the hidden units as we did in \autoref{part6}, obtaining the heatmap depicted in \autoref{fig:p10_weights}. We also have the outputs associated with each image listed in \autoref{lst:task10}.
+   
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{results/part10}
+    \caption{Weight visualization.}
+    \label{fig:p10_weights}
+\end{figure}
+
+\lstinputlisting[language=Python,
+    caption={Output weights associated with each image.},
+    label={lst:task10}]{results/part10.out}
+     
+Differently than what was observed in \autoref{part6}, the weights now seem to be extracting higher level features of the input. With each weight representing how much the model expects the pixel to be drawn according to the training data. It is not trivial, however, to make much sense of each weight alone as we did in \autoref{part6}. Image 7, for instance, has high output weights associated with digits 1, 2, 7 and 8 but the correct output of the network depends on the synergy of many such weights to extract enough features to differentiate each digit.
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+\end{document}
