@@ -1,10 +1,11 @@
 from part3 import *
+import numpy as np
 
 def backpropagate_momentum_epoch(x, w, b, y, rate, momentum, batch_size):
     '''
     We reimplement the gradient calculation routines in-line for performance optimization
     '''
-    new_grads = [0.0, 0.0]
+    new_grads = np.array([0.0, 0.0])
     np.random.seed(0)
     m = len(x)
     ids = np.random.permutation(m)
@@ -23,9 +24,9 @@ def backpropagate_momentum_epoch(x, w, b, y, rate, momentum, batch_size):
         # --------------------
 
         old_grads = new_grads
-        new_grads = [grad_weight, grad_bias]
-        w += -rate * new_grads[0] + momentum * old_grads[0]
-        b += -rate * new_grads[1] + momentum * old_grads[1]
+        new_grads = [grad_weight, grad_bias] + momentum * old_grads
+        w += -rate * new_grads[0]
+        b += -rate * new_grads[1]
 
     return w, b
 
