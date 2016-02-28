@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def visualize_weights(w, plot=False, ext='pdf', part=6):
-    np.random.seed(0)
+    np.random.seed(10)
     ids = np.random.choice(w.shape[1], 10, False)
     ids.sort()
     fig, axes = plt.subplots(nrows=2, ncols=5)
