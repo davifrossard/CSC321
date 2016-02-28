@@ -1,13 +1,9 @@
-from scipy.io import loadmat
-from part1 import *
-
 import numpy as np
-import matplotlib.pyplot as plt
-
 
 def feed_forward(inputs, weights, biases, functions):
     if not (len(weights) == len(biases) and len(biases) == len(functions)):
-        raise ValueError("Inconsistent Model. Different number of weights, biases and functions.")
+        raise ValueError("Inconsistent Model. \
+                          Different number of weights, biases and functions.")
     layers = len(weights)
     outputs = []
     activations = []
@@ -17,4 +13,5 @@ def feed_forward(inputs, weights, biases, functions):
         outputs.append(output)
         inputs = functions[l](output)
         activations.append(inputs)
-    return inputs, outputs, activations
+    final_activation = inputs
+    return final_activation, outputs, activations
