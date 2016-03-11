@@ -1,118 +1,188 @@
 import numpy as np
 import tensorflow as tf
 import time, datetime
+import matplotlib.pyplot as plt
+import cPickle as cp
 
-def train_neural_net(sets, hidden_units=[1500], functions=[tf.nn.relu], batch_size=50, training_epochs=5000, dropout=1):
+from operator import mul
+from functools import reduce
+
+def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_size=50, dropout=0.8, index=0, lmbda=0,
+                     max_iter=3000, best=float('inf'), conv_input=False):
 
     x_train, t_train, x_validation, t_validation, x_test, t_test = sets
 
-    in_size = len(x_train[0])
+    in_size = reduce(mul, list(x_train[0].shape))
+    in_dim = int(np.sqrt(in_size))
     nclass = 6
+    EXP = 5e-5 # Convergence tolerance
+    two_layer = len(hidden_units) > 1
 
-    topology = {'topology': str("%d x %s x %d" %(in_size, " x ".join((str(hu) for hu in hidden_units)), nclass))}
-    funcs = {'activation functions':functions}
-    #NN Model
-    x = tf.placeholder(tf.float32, [None, in_size], name="Inputs")
-    y = tf.placeholder(tf.float32, [None, nclass], name="Expected_Ouputs")
-    keep_prob = tf.placeholder("float", name="Dropout_Rate")
+    x = tf.placeholder(tf.float32, [None, in_size], name="Input")
+    y = tf.placeholder(tf.float32, [None, nclass], name="Expected_Output")
+    keep_prob = tf.placeholder("float", name="Keep_Probability")
 
-    layer_w, layer_b, layer_a, layer_drop = [], [], [], []
+    ''' NEURAL NETWORK TOPOLOGY '''
+    # Hidden Layer
+    with tf.name_scope("Hidden_Layer") as scope:
+        w0 = tf.Variable(tf.truncated_normal([in_size, hidden_units[0]], mean=0.03, stddev=0.01), name="Weight")
+        b0 = tf.Variable(tf.truncated_normal([hidden_units[0]], mean=0.03, stddev=0.01), name="Bias")
+        a0 = functions[0](tf.matmul(x, w0) + b0)
+        d0 = tf.nn.dropout(a0, keep_prob)
+        out = d0
 
-    #Input Layer
-    with tf.name_scope("Input_Layer") as scope:
-        layer_w.append(tf.Variable(tf.random_uniform([in_size, hidden_units[0]]), name="Input_Weight"))
-        layer_b.append(tf.Variable(tf.random_uniform([hidden_units[0]]), name="Input_Bias"))
-        layer_drop.append(tf.nn.dropout(layer_w[0], keep_prob))
-        layer_a.append(functions[0](tf.matmul(x, layer_drop[0]) + layer_b[0]))
-        #Prevent overfitting with dropout
+    # Second hidden layer
+    if two_layer:
+        with tf.name_scope("2nd_Hidden_Layer") as scope:
+            w1 = tf.Variable(tf.truncated_normal([hidden_units[0], hidden_units[1]], mean=0.03, stddev=0.01), name="Weight")
+            b1 = tf.Variable(tf.truncated_normal([hidden_units[1]], mean=0.03, stddev=0.01), name="Bias")
+            a1 = functions[1](tf.matmul(out, w1) + b1)
+            d1 = tf.nn.dropout(a1, keep_prob)
+            out = d1
 
-
-    for i in range(1,len(hidden_units)):
-        with tf.name_scope("Hidden_Layer_%d" %(i)) as scope:
-            layer_w.append(tf.Variable(tf.random_uniform([hidden_units[i-1], hidden_units[i]]), name="Hidden_Weight_%d" %(i)))
-            layer_b.append(tf.Variable(tf.random_uniform([hidden_units[i]]), name="Hidden_Bias_%d" %(i)))
-            layer_drop.append(tf.nn.dropout(layer_w[i], keep_prob))
-            layer_a.append(functions[i](tf.matmul(layer_a[-1], layer_drop[i]) + layer_b[i]))
-
-
+    # Output Layer
     with tf.name_scope("Output_Layer") as scope:
-        layer_w.append(tf.Variable(tf.random_uniform([hidden_units[-1], nclass]), name="Output_Weight"))
-        layer_b.append(tf.Variable(tf.random_uniform([nclass]), name="Output_Bias"))
-        layer_drop.append(tf.nn.dropout(layer_w[-1], keep_prob))
-        logits = tf.add(tf.matmul(layer_a[-1], layer_drop[-1]), layer_b[-1])
-        layer_a.append(tf.nn.softmax(logits))
-    output_a = layer_a[-1]
+        wout = tf.Variable(tf.truncated_normal([hidden_units[-1], nclass], mean=0.03, stddev=0.01), name="Weight")
+        bout = tf.Variable(tf.truncated_normal([nclass], mean=0.03, stddev=0.01), name="Bias")
+        logits = tf.matmul(out, wout) + bout
+        output = tf.nn.softmax(logits)
+    ''' END NEURAL NETWORK TOPOLOGY '''
 
 
+    ''' OBJECTIVE PARAMETERS '''
     #Training Specification
-    with tf.name_scope("Train") as scope:
-        epoch = tf.Variable(0)
+    with tf.name_scope("Training") as scope:
+        iter_var = tf.Variable(0)
+        with tf.name_scope("Regularization") as scope:
+            regularizer = tf.nn.l2_loss(w0) + tf.nn.l2_loss(w1) if two_layer else tf.nn.l2_loss(w0)
+            l1_regularizer = tf.reduce_mean(tf.abs(w0)) + tf.reduce_mean(tf.abs(w1)) if two_layer else tf.reduce_mean(tf.abs(w0))
         cost_batch = tf.nn.softmax_cross_entropy_with_logits(logits, y)
-        regularizer = tf.reduce_mean(sum([tf.nn.l2_loss(w) for w in layer_w]))
-        cost = tf.reduce_mean(cost_batch)
-        optimizer = tf.train.AdagradOptimizer(1e-2).minimize(cost + 5e-4*regularizer, global_step=epoch)
+        cost = tf.reduce_mean(cost_batch) + lmbda * regularizer
+        optimizer = tf.train.AdamOptimizer().minimize(cost, global_step=iter_var)
 
     # Test accuracy
-    with tf.name_scope("Output_Accuracy") as scope:
-        correct_prediction = tf.equal(tf.argmax(output_a, 1), tf.argmax(y, 1))
+    with tf.name_scope("Evaluation") as scope:
+        correct_prediction = tf.equal(tf.argmax(output, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))*100
+    ''' END OBJECTIVE PARAMETERS '''
 
     sess = tf.Session()
-    costs = []
-    accuracies = []
-
     init = tf.initialize_all_variables()
     sess.run(init)
 
-    print "------------------------------------"
-    print topology
-    print funcs
-    print "------------------------------------"
+    ''' TENSORBOARD CONFIGURATION '''
+    writer = tf.train.SummaryWriter("tboard/%d" %(index), sess.graph_def)
 
-    with sess.as_default():
+    # Histograms
+    w_hist = tf.histogram_summary("1st_Weights", w0)
+    b_hist = tf.histogram_summary("1st_Biases", b0)
+    y_hist = tf.histogram_summary("Output", output)
+    hists = tf.merge_summary([w_hist, b_hist, y_hist])
+    if two_layer:
+        w1_hist = tf.histogram_summary("2nd_Weights", w1)
+        b1_hist = tf.histogram_summary("2nd_Biases", b1)
+        hists = tf.merge_summary([hists, w1_hist, b1_hist])
+    # weights_image = tf.reshape(w0, [-1, in_dim, in_dim, 1])
+    # w_image = tf.image_summary('Weights', weights_image, max_images=25)
+    # hists = tf.merge_summary([hists, w_image])
+
+    # Summaries
+    train_accuracy_summary = tf.scalar_summary("Train_Accuracy", accuracy)
+    validation_accuracy_summary = tf.scalar_summary("Validation_Accuracy", accuracy)
+    test_accuracy_summary = tf.scalar_summary("Test_Accuracy", accuracy)
+
+    train_cost_summary = tf.scalar_summary("Train_Cost", cost)
+    validation_cost_summary = tf.scalar_summary("Validation_Cost", cost)
+    test_cost_summary = tf.scalar_summary("Test_Cost", cost)
+
+    train_ops = [tf.merge_summary([hists, train_accuracy_summary, train_cost_summary]), cost, accuracy]
+    validation_ops = [tf.merge_summary([validation_accuracy_summary, validation_cost_summary]), cost, accuracy]
+    test_ops = [tf.merge_summary([test_accuracy_summary, test_cost_summary]), cost, accuracy]
+    '''END TENSORBOARD CONFIGURATION'''
+
+    last_cost = 0
+    last_val = 0
+
+    with tf.device('/cpu:0') and sess.as_default():
         # Training cycle
-        while epoch < training_epochs:
-            epoch += 1
+        total_batches = int(x_train.shape[0] / batch_size)
+        while True:
+            epoch = iter_var.eval()/total_batches+1
 
-            total_batches = int(x_train.shape[0] / batch_size)
+            #Shuffle training set
+            ids = np.random.permutation(len(x_train))
+            x_train = x_train[ids]
+            t_train = t_train[ids]
 
-            combined = zip(x_train, t_train)
-            np.random.shuffle(combined)
-            x_train[:], t_train[:] = zip(*combined)
-            # Loop over all batches
+            # Complete training epoch
             for i in range(total_batches):
                 batch_xs = x_train[i*batch_size:(i+1)*batch_size]
                 batch_ys = t_train[i*batch_size:(i+1)*batch_size]
                 # Fit training using batch data
                 sess.run(optimizer, feed_dict={x: batch_xs, y: batch_ys, keep_prob: dropout})
 
-            if epoch.eval() % 10 == 0:
-                train_cost = sess.run(cost, feed_dict={x: x_train, y: t_train, keep_prob: 1})
-                train_accuracy = accuracy.eval({x: x_train, y: t_train, keep_prob: 1})
+            # Evaluate network
+            if epoch % 5 == 0:
+                train = sess.run(train_ops, feed_dict={x: x_train, y: t_train, keep_prob: 1})
+                writer.add_summary(train[0], epoch)
 
-                validation_cost = sess.run(cost, feed_dict={x: x_validation, y: t_validation, keep_prob: 1})
-                validation_accuracy = accuracy.eval({x: x_validation, y: t_validation, keep_prob: 1})
+                validation = sess.run(validation_ops, feed_dict={x: x_validation, y: t_validation, keep_prob: 1})
+                writer.add_summary(validation[0], epoch)
 
-                test_cost = sess.run(cost, feed_dict={x: x_test, y: t_test, keep_prob: 1})
-                test_accuracy = accuracy.eval({x: x_test, y: t_test, keep_prob: 1})
+                test = sess.run(test_ops, feed_dict={x: x_test, y: t_test, keep_prob: 1})
+                writer.add_summary(test[0], epoch)
 
-                costs.append([train_cost, validation_cost, test_cost])
-                accuracies.append([train_accuracy, validation_accuracy, test_accuracy])
+                if abs(train[1] - last_cost) < EXP:
+                    print "Converged!"
+                    break
+                
+                if validation[2] > last_val:
+                    print "New best generation:"
+                    print "\t Accuracy: %4.2f%%" %(validation[2])
+                    bench_val = [train[1], validation[1], test[1]], [train[2], validation[2], test[2]]
+                    last_val = validation[2]
+                    if two_layer:
+                        params = [w0.eval(), w1.eval(), b0.eval(), b1.eval()]
+                    else:
+                        params = [w0.eval(), b0.eval()]
 
-                st = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
-                print "[%s] Epoch: %3d" % (st, epoch.eval())
-                print "\tTraining Set:   Cost: %8.3f Accuracy: %d%%" %(train_cost, train_accuracy)
-                print "\tValidation Set: Cost: %8.3f Accuracy: %d%%" %(validation_cost, validation_accuracy)
-                print "\tTest Set:       Cost: %8.3f Accuracy: %d%%\n\n" %(test_cost, test_accuracy)
+                last_cost = train[1]
 
-                # if len(costs) > 3 and validation_cost > 1.01*costs[-3][1] and validation_cost > costs[-2][1]:
-                #     print "Early stopping!"
-                #     break
+                if epoch % 50 == 0:
 
-        print "Optimization Finished!"
+                    st = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
+                    print "[%s] Epoch: %3d" % (st, epoch)
+                    print "\tTraining Set:   Cost: %8.3f Accuracy: %d%%" %(train[1], train[2])
+                    print "\tValidation Set: Cost: %8.3f Accuracy: %d%%" %(validation[1], validation[2])
+                    print "\tTest Set:       Cost: %8.3f Accuracy: %d%%\n\n" %(test[1], test[2])
 
-    costs = np.array(costs)
+                    if epoch % max_iter == 0:
+                        print "Too many epochs!"
+                        break
 
-    accuracies = np.array(accuracies)
+    if validation[2] > best:
+        with open('neural_network_%s.pickle' %('conv' if conv_input else 'ff'), 'wb') as f:
+            cp.dump(params, f)
 
-    return costs, accuracies
+    sess.close()
+
+    print "Optimization Finished!"
+
+    return bench_val
+
+
+def visualize_weights(w, num=-1, title=None):
+    dim = w.shape[1]
+    shp = [int(np.sqrt(w.shape[0]))] * 2
+    dims = int(np.sqrt(dim)) if num == -1 else min(int(np.sqrt(num)),int(np.sqrt(dim)))
+    ids = range(dim) if num == -1 else np.random.choice(dim, min(num*2))
+    fig, axes = plt.subplots(nrows=dims, ncols=dims)
+    fig.suptitle('Weight Visualization', size=20)
+    for i, ax in enumerate(axes.flat):
+        heatmap = ax.imshow(w[:,ids[i]].reshape(shp), cmap = plt.cm.coolwarm)
+        ax.set_axis_off()
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    fig.colorbar(heatmap, cax=cbar_ax)
+    plt.savefig('results/weigts_%s.pdf' %(title), bbox_inches='tight')
+    plt.close()
