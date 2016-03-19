@@ -8,25 +8,25 @@ from operator import mul
 from functools import reduce
 
 def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_size=50, dropout=0.8, index=0, lmbda=0,
-                     max_iter=3000, best=float('inf'), conv_input=False):
+                     max_iter=3000, best=float('inf'), conv_input=False, save=False, title=None):
 
     x_train, t_train, x_validation, t_validation, x_test, t_test = sets
 
     in_size = reduce(mul, list(x_train[0].shape))
     in_dim = int(np.sqrt(in_size))
     nclass = 6
-    EXP = 5e-5 # Convergence tolerance
+    EXP = 1e-5 # Convergence tolerance
     two_layer = len(hidden_units) > 1
 
     x = tf.placeholder(tf.float32, [None, in_size], name="Input")
     y = tf.placeholder(tf.float32, [None, nclass], name="Expected_Output")
-    keep_prob = tf.placeholder("float", name="Keep_Probability")
+    keep_prob = tf.placeholder(tf.float32, name="Keep_Probability")
 
     ''' NEURAL NETWORK TOPOLOGY '''
     # Hidden Layer
     with tf.name_scope("Hidden_Layer") as scope:
-        w0 = tf.Variable(tf.truncated_normal([in_size, hidden_units[0]], mean=0.03, stddev=0.01), name="Weight")
-        b0 = tf.Variable(tf.truncated_normal([hidden_units[0]], mean=0.03, stddev=0.01), name="Bias")
+        w0 = tf.Variable(tf.truncated_normal([in_size, hidden_units[0]], mean=0.01, stddev=0.01), name="Weight")
+        b0 = tf.Variable(tf.truncated_normal([hidden_units[0]], mean=0.01, stddev=0.01), name="Bias")
         a0 = functions[0](tf.matmul(x, w0) + b0)
         d0 = tf.nn.dropout(a0, keep_prob)
         out = d0
@@ -34,16 +34,16 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
     # Second hidden layer
     if two_layer:
         with tf.name_scope("2nd_Hidden_Layer") as scope:
-            w1 = tf.Variable(tf.truncated_normal([hidden_units[0], hidden_units[1]], mean=0.03, stddev=0.01), name="Weight")
-            b1 = tf.Variable(tf.truncated_normal([hidden_units[1]], mean=0.03, stddev=0.01), name="Bias")
+            w1 = tf.Variable(tf.truncated_normal([hidden_units[0], hidden_units[1]], mean=0.01, stddev=0.01), name="Weight")
+            b1 = tf.Variable(tf.truncated_normal([hidden_units[1]], mean=0.01, stddev=0.01), name="Bias")
             a1 = functions[1](tf.matmul(out, w1) + b1)
             d1 = tf.nn.dropout(a1, keep_prob)
             out = d1
 
     # Output Layer
     with tf.name_scope("Output_Layer") as scope:
-        wout = tf.Variable(tf.truncated_normal([hidden_units[-1], nclass], mean=0.03, stddev=0.01), name="Weight")
-        bout = tf.Variable(tf.truncated_normal([nclass], mean=0.03, stddev=0.01), name="Bias")
+        wout = tf.Variable(tf.truncated_normal([hidden_units[-1], nclass], mean=0.01, stddev=0.01), name="Weight")
+        bout = tf.Variable(tf.truncated_normal([nclass], mean=0.01, stddev=0.01), name="Bias")
         logits = tf.matmul(out, wout) + bout
         output = tf.nn.softmax(logits)
     ''' END NEURAL NETWORK TOPOLOGY '''
@@ -103,7 +103,7 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
     last_cost = 0
     last_val = 0
 
-    with tf.device('/cpu:0') and sess.as_default():
+    with sess.as_default():
         # Training cycle
         total_batches = int(x_train.shape[0] / batch_size)
         while True:
@@ -142,9 +142,9 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
                     bench_val = [train[1], validation[1], test[1]], [train[2], validation[2], test[2]]
                     last_val = validation[2]
                     if two_layer:
-                        params = [w0.eval(), w1.eval(), b0.eval(), b1.eval()]
+                        params = [w0.eval(), w1.eval(), b0.eval(), b1.eval(), wout.eval(), bout.eval()]
                     else:
-                        params = [w0.eval(), b0.eval()]
+                        params = [w0.eval(), b0.eval(), wout.eval(), bout.eval()]
 
                 last_cost = train[1]
 
@@ -160,8 +160,8 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
                         print "Too many epochs!"
                         break
 
-    if validation[2] > best:
-        with open('neural_network_%s.pickle' %('conv' if conv_input else 'ff'), 'wb') as f:
+    if validation[2] > best or save:
+        with open('results/neural_network_%s%s.pickle' %('conv' if conv_input else 'ff', '_'+str(title) if title else ''), 'wb') as f:
             cp.dump(params, f)
 
     sess.close()
@@ -175,7 +175,7 @@ def visualize_weights(w, num=-1, title=None):
     dim = w.shape[1]
     shp = [int(np.sqrt(w.shape[0]))] * 2
     dims = int(np.sqrt(dim)) if num == -1 else min(int(np.sqrt(num)),int(np.sqrt(dim)))
-    ids = range(dim) if num == -1 else np.random.choice(dim, min(num*2))
+    ids = range(dim) if num == -1 else np.random.choice(dim, min(dim, num*2))
     fig, axes = plt.subplots(nrows=dims, ncols=dims)
     fig.suptitle('Weight Visualization', size=20)
     for i, ax in enumerate(axes.flat):
@@ -184,5 +184,5 @@ def visualize_weights(w, num=-1, title=None):
     fig.subplots_adjust(right=0.8)
     cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
     fig.colorbar(heatmap, cax=cbar_ax)
-    plt.savefig('results/weigts_%s.pdf' %(title), bbox_inches='tight')
+    plt.savefig('results/weights_%s.pdf' %(title), bbox_inches='tight')
     plt.close()
