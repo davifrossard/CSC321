@@ -1,11 +1,29 @@
 from random import shuffle
 import numpy as np
+import csv
 from collections import OrderedDict
+
+def get_data(fname):
+    best_val_accuracy = 0.0
+    last_i = 0
+    layer = 4
+    with open(fname, 'a+') as file:
+        models = csv.reader(file, delimiter=',')
+        for line in models:
+            last_i = int(line[0]) or last_i
+            val_accuracy = float(line[-2])
+            if val_accuracy > best_val_accuracy:
+                best_val_accuracy = val_accuracy
+                try:
+                    layer = int(line[4])
+                except:
+                    pass
+    return last_i, best_val_accuracy, layer
 
 def make_sets(input, classes, train=85, validation=30):
 
     # Shuffle Sets
-    np.random.seed(1)
+    np.random.seed(0)
     ids = np.random.permutation(len(input))
 
     input = np.array(input)[ids]
