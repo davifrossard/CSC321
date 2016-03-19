@@ -10,7 +10,7 @@ from get_data_file import *
 from set_utils import *
 from neural_net import train_neural_net, visualize_weights
 from AlexNet.myalexnet import alex_net
-from AlexNet.anet_actors import convert_faces, eval_alex_net, train_alex_net, gradient_output, plot_curves, guided_backprop
+from AlexNet.anet_actors import *
 
 # Configurations
 datafile = 'data.txt'
@@ -174,7 +174,7 @@ for i, id in enumerate(ids):
         plt.title(title, color='green', size=10)
     plt.axis('off')
 plt.suptitle('Neural Network Predictions', size=20)
-plt.subplots_adjust(top=0.9)
+plt.subplots_adjust(top=0.8)
 plt.savefig('results/part4_predictions.pdf')
 plt.close()
 
@@ -211,3 +211,15 @@ set = make_sets(facesi, classes, 85*len(act), 35*len(act))
 cost, accuracies, newbest = train_alex_net(set, params)
 if newbest:
     plot_curves(cost, accuracies)
+    
+
+''' PART 7 '''
+print "\n\nRUNNING PART 7"
+with open('results/neural_network_conv.pickle', 'rb') as f:
+    params = cp.load(f)
+    _,_, layer = get_data('results/models_conv.csv')
+    params.append(layer)
+
+plot_gradients(deepcopy(faces_o), params, act)
+plt.savefig('results/part7_gradient.pdf')
+plt.close()

@@ -28,7 +28,7 @@ def convert_faces(faces):
     :return: List of processed face images
     '''
     for i, face in enumerate(faces):
-        imgr = imresize(face, (227,227))/255.0
+        imgr = imresize(face, (227,227))/255.
         img = (np.random.random((1, 227, 227, 3)) / 255.).astype('float32')
         img[0, :, :, :] = imgr[:, :, :3]
         img = img - np.mean(img)
@@ -173,7 +173,7 @@ def alex_net_actors(params):
 
 def eval_alex_net(faces, params):
 
-    img_input, output, _, dropout, _ = alex_net_actors(params)
+    img_input, output, _, dropout, _, _ = alex_net_actors(params)
     sess = tf.Session()
     init = tf.initialize_all_variables()
     outputs = []
@@ -235,7 +235,7 @@ def train_alex_net(sets, params, max_iter=500, lmbda=0.001, keep_prob=0.9):
                     print "Found new best model!"
                     sess.run(best_acc.assign(vaccuracy))
                     saver.save(sess, "trained_alexnet.ckpt")
-                    with open('results/part6_result.csv', 'a') as fl:
+                    with open('results/part6_result.csv', 'w+') as fl:
                         fl.write("%.4f, %.2f, %.4f, %.2f, %.4f, %.2f\n" %(tcost, taccuracy, vcost, vaccuracy, tecost, teaccuracy))
 
                 st = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
@@ -254,34 +254,33 @@ def train_alex_net(sets, params, max_iter=500, lmbda=0.001, keep_prob=0.9):
 
 
 def gradient_output(face_o, params):
-    for i,face in enumerate(face_o):
-        face_o[i] = imresize(face, (227,227))
     faces = convert_faces(deepcopy(face_o))
     img_input, output, _, dropout, _, _ = alex_net_actors(params)
     sess = tf.Session()
     init = tf.initialize_all_variables()
-    grads = tf.gradients(output, img_input)[0]
+    ggrads = tf.gradients(output, img_input)[0]
 
     with sess.as_default():
         sess.run(init)
         for i,face in enumerate(faces):
-            grads = sess.run(grads, feed_dict={img_input:face, dropout: 1.0})[0]
+            grads = sess.run(ggrads, feed_dict={img_input:face, dropout: 1.0})[0]
             if np.max(grads) > 0:
                 break
 
     grads = 255. * grads / np.max(grads)
     grads = np.maximum(grads, 0)
-    plt.suptitle('Output Gradient', size=20)
+    plt.suptitle('Image Gradient', size=20)
     plt.subplot(121)
-    plt.imshow(rgb2gray(grads), cmap=plt.cm.coolwarm)
-    plt.title('Gradient')
-    plt.axis('off')
-    plt.subplot(122)
     plt.imshow(face_o[i])
     plt.title('Input image')
     plt.axis('off')
+    plt.subplot(122)
+    plt.imshow(rgb2gray(grads))
+    plt.title('Gradient')
+    plt.axis('off')
+    plt.gray()
 
-    return grads
+    return grads, i
 
 
 def plot_curves(cost, accuracy):
@@ -458,7 +457,6 @@ def guided_backprop(face_o, params):
             for i,face in enumerate(faces):
                 sess.run(tf.initialize_all_variables())
                 pred = sess.run(oA, feed_dict={img: face})
-                print pred
                 cl = np.argmax(pred)
                 oA = tf.split(1, 6, oA)[cl]
                 grad = tf.gradients(oA, img)
@@ -468,47 +466,42 @@ def guided_backprop(face_o, params):
                 if np.max(gradient) > 0:
                     break
 
-        gradient
-
     return gradient, cl, i
 
 def plot_gradients(face, params, act):
-    grad, c, _ = guided_backprop([face], params)
-    grad2 = gradient_output([face], params)
+    grad2, i = gradient_output(deepcopy(face), params)
+    grad, c, _ = guided_backprop([face[i]], params)
     grad = gaussian_filter(grad, 1.5)
 
     grad /= np.max(grad)
     grad2 /= np.max(grad2)
 
-    plt.subplot(3,2,1)
+    plt.subplot(2,4,3)
     plt.imshow(np.maximum(grad,0))
-    plt.title('Guided Backpropagation (Pos)')
+    plt.title('Guided Gradient\n(+)')
     plt.axis('off')
 
-    plt.subplot(3,2,2)
+    plt.subplot(2,4,4)
     plt.imshow(np.abs(grad))
-    plt.title('Guided Backpropagation (Abs)')
+    plt.title('Guided Gradient\n(Abs)')
     plt.axis('off')
 
-    plt.subplot(3,2,3)
+    plt.subplot(2,4,7)
     plt.imshow(np.minimum(grad,0))
-    plt.title('Guided Backpropagation (Neg)')
+    plt.title('Guided Gradient\n(-)')
     plt.axis('off')
 
-    plt.subplot(3,2,4)
-    plt.imshow(grad)
-    plt.title('Guided Backpropagation')
-    plt.axis('off')
-
-    plt.subplot(3,2,5)
-    plt.imshow(face)
-    plt.title('Input Image\n%s' %act[c])
-    plt.axis('off')
-
-    plt.subplot(3,2,6)
+    plt.subplot(2,4,8)
     plt.imshow(rgb2gray(grad2))
     plt.gray()
     plt.title('Gradient')
     plt.axis('off')
+
+    plt.subplot(1,2,1)
+    plt.imshow(face[i])
+    plt.title('Input Image\n%s' %act[c])
+    plt.axis('off')
+
+    plt.tight_layout()
 
     return grad, grad2
