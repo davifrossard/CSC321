@@ -511,6 +511,4 @@ def plot_gradients(face, params, act):
     plt.title('Gradient')
     plt.axis('off')
 
-    plt.show()
-
     return grad, grad2
