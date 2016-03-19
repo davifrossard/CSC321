@@ -18,7 +18,6 @@ import tensorflow as tf
 from numpy.random import random
 from caffe_classes import class_names
 
-
 def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w,  padding="VALID", group=1):
     '''From https://github.com/ethereon/caffe-tensorflow
     '''
