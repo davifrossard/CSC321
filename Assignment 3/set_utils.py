@@ -23,7 +23,7 @@ def get_data(fname):
 def make_sets(input, classes, train=85, validation=30):
 
     # Shuffle Sets
-    np.random.seed(0)
+    np.random.seed(10)
     ids = np.random.permutation(len(input))
 
     input = np.array(input)[ids]

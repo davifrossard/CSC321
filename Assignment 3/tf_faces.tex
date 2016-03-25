@@ -1,0 +1,558 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Programming/Coding Assignment
+% LaTeX Template
+%
+% This template has been downloaded from:
+% http://www.latextemplates.com
+%
+% Original author:
+% Ted Pavlic (http://www.tedpavlic.com)
+%
+% Note:
+% The \lipsum[#] commands throughout this template generate dummy text
+% to fill the template out. These commands should all be removed when 
+% writing assignment content.
+%
+% This template uses a Perl script as an example snippet of code, most other
+% languages are also usable. Configure them in the "CODE INCLUSION 
+% CONFIGURATION" section.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{longtable}
+\usepackage{bm}
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{listings} % Required for insertion of code
+\usepackage{courier} % Required for the courier font
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+\usepackage{pgfplotstable} % Import csv data
+\usepackage{amsmath} % Math equation tools
+\usepackage{hyperref} % Create references\pgfplotsset{compat=1.12}
+\usepackage{filecontents}% Used so that the external files can be placed in this file
+\usepackage{pgf} % Loops in latex
+\usepackage{bookmark}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{siunitx} % Formats the units and values
+\usepackage{parskip}
+
+\setlength{\parskip}{10pt} % 1ex plus 0.5ex minus 0.2ex}
+
+
+
+% Setup siunitx:
+\sisetup{
+  round-mode          = places, % Rounds numbers
+  round-precision     = 4, % to 2 places
+}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+\renewcommand{\tableautorefname}{Table}
+\renewcommand{\lstlistingname}{Code}
+\renewcommand{\equationautorefname}{Eq.}
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkClass\ (\hmwkClassTime): \hmwkTitle} % Top center head
+%\rhead{\firstxmark} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\DeclareGraphicsExtensions{.eps,.pdf,.png,.jpg,.jpeg}
+
+%----------------------------------------------------------------------------------------
+%	CODE INCLUSION CONFIGURATION
+%----------------------------------------------------------------------------------------
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{Python} % Load Perl syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=Python, % Use Perl in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}\bf, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers                                         
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=2, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=1  % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\perlscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1]{#1.pl}
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+%\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+%\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+%\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+%\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{0} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+\setcounter{homeworkProblemCounter}{0}
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Part \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\def\sectionautorefname{Part}
+\refstepcounter{homeworkProblemCounter}%
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+\noindent\framebox[\columnwidth][c]{\begin{minipage}{0.98\columnwidth}#1\end{minipage}} % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Assignment 3} % Assignment title
+\newcommand{\hmwkDueDate}{Monday,\ March\ 21,\ 2016} % Due date
+\newcommand{\hmwkClass}{CSC321} % Course/class
+\newcommand{\hmwkClassTime}{L0101} % Class/lecture time
+\newcommand{\hmwkAuthorName}{Davi Frossard} % Your name
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+\normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
+\vspace{0.1in}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+%\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+	
+
+\maketitle
+\clearpage
+
+
+%----------------------------------------------------------------------------------------
+%	PART 1
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part1}
+
+To find good hyperparameters for the model, we randomize the number of hidden units from 200 to 850, the activation function between ReLU and Tanh, and $\lambda$ (the L2 regularization factor) from $9\cdot10^{-3}$ to $0$, all models have dropout with a keep probability of 50\% and are trained using Adam Optimizer with a learning rate of 0.0005. We also keep track of the validation accuracy throughout the training, therefore we are able to only save the model that better fits the data according to this metric. We also halt the training if the difference in cost between 5 epochs is less than $1\cdot10^{-5}$.
+
+To prevent dead neurons in ReLU units, we initialize the weights randomly with values drawn from a truncated normal distribution with mean 0 and standard deviation equal to 0.01; the biases are initialized with all values set to 0.1, thus guaranteeing we have positive and negative values with small magnitudes and that the input to ReLU units do not kill them right at the beginning. We also normalize the inputs by dividing it by 255, resize it to (100,100), convert to grayscale and flatten the matrix, which guarantees values in the range of 0 to 1 while still maintaining color data, which might be useful in identifying the actors.
+
+In order to come up with these \textit{hyper-hyperparameters} we keep trying values smaller than the minimum or bigger than the maximum until it no longer produces a reasonable model. With the boundaries in hand we just mix them randomly in order to find the best models.
+
+We make the training set with 510 random images, the validation set with 162 and the remaining goes to the test set (around 160 images). With these parameters we find the models listed in \autoref{tab:task1}.
+
+\begin{table}[H]
+	\centering
+	\resizebox{\columnwidth}{!}{
+		\pgfplotstabletypeset[
+		header=false,
+		col sep=comma,
+		string type,
+		display columns/0/.style={column name=\textbf{ID}, column type={|c|}},
+		display columns/1/.style={column name=\textbf{Units}, column type={c|}},
+		display columns/2/.style={column name=\textbf{Function}, column type={c|}},
+		display columns/3/.style={column name=\textbf{Regularization}, column type={S|}},
+		display columns/4/.style={column name=\multicolumn{1}{c|}{\textbf{Train}}, column type={S|}},
+		display columns/5/.style={column name=\multicolumn{1}{c|}{\textbf{Validation}}, column type={S|}},
+		display columns/6/.style={column name=\multicolumn{1}{c|}{\textbf{Test}}, column type={S|}},
+		display columns/7/.style={column name=\multicolumn{1}{c|}{\textbf{Train}}, column type={S|}},
+		display columns/8/.style={column name=\multicolumn{1}{c|}{\textbf{Validation}}, column type={S|}},
+		display columns/9/.style={column name=\multicolumn{1}{c|}{\textbf{Test}}, column type={S|}},
+			every head row/.style={before row=\cline{2-10} \multicolumn{1}{c|}{\textbf{}} & \multicolumn{3}{c|}{\textbf{Hyperparameters}} & \multicolumn{3}{c|}{\textbf{Cost}} & \multicolumn{3}{c|}{\textbf{Accuracy (\%)}}\\\hline,after row=\hline},
+		every last row/.style={after row=\hline},
+		]{results/models.csv}
+	}
+	\caption{Hyperparameter search.}
+	\label{tab:task1}
+\end{table}
+
+From \autoref{tab:task1}, we find the best model according to validation accuracy, which gives us \autoref{tab:task1_best}.
+
+\begin{table}[H]
+	\centering
+	\resizebox{\columnwidth}{!}{
+		\pgfplotstabletypeset[
+		header=false,
+		col sep=comma,
+		string type,
+		display columns/0/.style={column name=\textbf{Units}, column type={|c|}},
+		display columns/1/.style={column name=\textbf{Function}, column type={c|}},
+		display columns/2/.style={column name=\textbf{Regularization}, column type={S|}},
+		display columns/3/.style={column name=\multicolumn{1}{c|}{\textbf{Train}}, column type={S|}},
+		display columns/4/.style={column name=\multicolumn{1}{c|}{\textbf{Validation}}, column type={S|}},
+		display columns/5/.style={column name=\multicolumn{1}{c|}{\textbf{Test}}, column type={S|}},
+		display columns/6/.style={column name=\multicolumn{1}{c|}{\textbf{Train}}, column type={S|}},
+		display columns/7/.style={column name=\multicolumn{1}{c|}{\textbf{Validation}}, column type={S|}},
+		display columns/8/.style={column name=\multicolumn{1}{c|}{\textbf{Test}}, column type={S|}},
+		every head row/.style={before row=\hline \multicolumn{3}{|c|}{\textbf{Hyperparameters}} & \multicolumn{3}{c|}{\textbf{Cost}} & \multicolumn{3}{c|}{\textbf{Accuracy (\%)}}\\\hline,after row=\hline},
+		every last row/.style={after row=\hline},
+		]{results/models_best.csv}
+	}
+	\caption{Best model from \autoref{tab:task1}.}
+	\label{tab:task1_best}
+\end{table}
+
+For this model, we have the training curves shown in \autoref{fig:task1_cost} and \autoref{fig:task1_accuracy}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/part12_cost_curve}
+	\caption{Cost curve for the model in \autoref{tab:task1_best}.}
+	\label{fig:task1_cost}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/part12_accuracy_curve}
+	\caption{Accuracy curve for the model in \autoref{tab:task1_best}.}
+	\label{fig:task1_accuracy}
+\end{figure}
+\clearpage
+
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+%	PART 2
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+	\label{part2}
+	
+We follow a procedure similar to that discussed in \autoref{part1}, however we now have an extra hyperparameter: The AlexNet layer to be used as input, which we randomize from 1 to 5. We also change the normalization of the inputs in order to match the one used in AlexNet, so the input is resized to (227,227) then subtracted of its own mean. In order to speed the process up, we also pre-compute the AlexNet activations and produce the training, validation and set from them. The remaining aspects are kept the same and we obtain the results listed in \autoref{tab:task2}.
+
+\begin{table}[H]
+	\centering
+	\resizebox{\columnwidth}{!}{
+		\pgfplotstabletypeset[
+		header=false,
+		col sep=comma,
+		string type,
+		display columns/0/.style={column name=\textbf{ID}, column type={|c|}},
+		display columns/1/.style={column name=\textbf{Units}, column type={c|}},
+		display columns/2/.style={column name=\textbf{Function}, column type={c|}},
+		display columns/3/.style={column name=\textbf{Regularization}, column type={S|}},
+		display columns/4/.style={column name=\textbf{Layer}, column type={c|}},
+		display columns/5/.style={column name=\multicolumn{1}{c|}{\textbf{Train}}, column type={S|}},
+		display columns/6/.style={column name=\multicolumn{1}{c|}{\textbf{Validation}}, column type={S|}},
+		display columns/7/.style={column name=\multicolumn{1}{c|}{\textbf{Test}}, column type={S|}},
+		display columns/8/.style={column name=\multicolumn{1}{c|}{\textbf{Train}}, column type={S|}},
+		display columns/9/.style={column name=\multicolumn{1}{c|}{\textbf{Validation}}, column type={S|}},
+		display columns/10/.style={column name=\multicolumn{1}{c|}{\textbf{Test}}, column type={S|}},
+		every head row/.style={before row=\cline{2-11} \multicolumn{1}{c|}{\textbf{}} & \multicolumn{4}{c|}{\textbf{Hyperparameters}} & \multicolumn{3}{c|}{\textbf{Cost}} & \multicolumn{3}{c|}{\textbf{Accuracy (\%)}}\\\hline,after row=\hline},
+		every last row/.style={after row=\hline},
+		]{results/models_conv.csv}
+	}
+	\caption{Hyperparameter search.}
+	\label{tab:task2}
+\end{table}
+
+From \autoref{tab:task2}, we find the best model according to validation accuracy, which gives us \autoref{tab:task2_best}.
+
+\begin{table}[H]
+	\centering
+	\resizebox{\columnwidth}{!}{
+		\pgfplotstabletypeset[
+		header=false,
+		col sep=comma,
+		string type,
+		display columns/0/.style={column name=\textbf{Units}, column type={|c|}},
+		display columns/1/.style={column name=\textbf{Function}, column type={c|}},
+		display columns/2/.style={column name=\textbf{Regularization}, column type={S|}},
+		display columns/3/.style={column name=\textbf{Layer}, column type={S|}},
+		display columns/4/.style={column name=\multicolumn{1}{c|}{\textbf{Train}}, column type={S|}},
+		display columns/5/.style={column name=\multicolumn{1}{c|}{\textbf{Validation}}, column type={S|}},
+		display columns/6/.style={column name=\multicolumn{1}{c|}{\textbf{Test}}, column type={S|}},
+		display columns/7/.style={column name=\multicolumn{1}{c|}{\textbf{Train}}, column type={S|}},
+		display columns/8/.style={column name=\multicolumn{1}{c|}{\textbf{Validation}}, column type={S|}},
+		display columns/9/.style={column name=\multicolumn{1}{c|}{\textbf{Test}}, column type={S|}},
+		every head row/.style={before row=\hline \multicolumn{4}{|c|}{\textbf{Hyperparameters}} & \multicolumn{3}{c|}{\textbf{Cost}} & \multicolumn{3}{c|}{\textbf{Accuracy (\%)}}\\\hline,after row=\hline},
+		every last row/.style={after row=\hline},
+		]{results/models_conv_best.csv}
+	}
+	\caption{Best model from \autoref{tab:task2}.}
+	\label{tab:task2_best}
+\end{table}
+
+For this model, we have the training curves shown in \autoref{fig:task1_cost} and \autoref{fig:task1_accuracy}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/part12_cost_conv_curve}
+	\caption{Cost curve for the model in \autoref{tab:task2_best}.}
+	\label{fig:task2_cost}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/part12_accuracy_conv_curve}
+	\caption{Accuracy curve for the model in \autoref{tab:task2_best}.}
+	\label{fig:task2_accuracy}
+\end{figure}
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	PART 3
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+	\label{part3}
+	
+We first train two networks: One with 300 hidden units and another with 800, both using ReLU activation, dropout and a L2 regularization factor of 0.001. With these parameters we obtain models with an average accuracy of 82\% and with the weights shown in \autoref{fig:task3_300} and \autoref{fig:task3_600}.
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/weights_300}
+	\caption{Sample weights for model with 300 hidden units.}
+	\label{fig:task3_300}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/weights_800}
+	\caption{Sample weights for model with 800 hidden units.}
+	\label{fig:task3_600}
+\end{figure}
+
+From inspecting the weights we can notice that some of them contain overlays of many faces as an attempt to extract useful features. However, its also noticeable how the model still overfits to some training cases even with dropout as we can see that some units are just memorizing the inputs, and in fact even creating duplicate memories as an attempt to become resilient to dropout. This happens even more often in the bigger model, with 800 units, since it is effectively able to memorize more inputs, it could, in fact, memorize the entire training set and achieve 100\% training accuracy.
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	PART 4
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part4}
+
+In order to make a unified system, we copy over the AlexNet architecture and plug in one of our previously trained densely connected networks (from \autoref{part2}) in the correct AlexNet layer. We can then feed the set of face images directly to it and get the relevant outputs (probabilities and classes)
+
+\begin{lstlisting}[language=Python,
+caption=Using the system.,
+label={lst:task2}]
+'''faces is a list of numpy images ans ff_params are the parameters of the densely
+ connected layers, in the following order [w_in, b_in, w_out, b_out, alex_net_layer].
+
+It returns two lists, "outputs" containing the softmax outputs and "classes"
+ with the most likely class for each image'''
+ 
+outputs, classes = eval_alex_net(faces, ff_params)
+\end{lstlisting}
+
+With the outputs of the system we produce \autoref{fig:task4}. For each image it displays the two classes with higher softmax probabilities (in parenthesis), texts in green means it got the correct class, while red means it misclassified.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/part4_predictions}
+	\caption{Predictions from the neural network.}
+	\label{fig:task4}
+\end{figure}
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	PART 5
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part5}
+
+To produce the gradient for a specific input image we use the system developed in \autoref{part4} and TensorFlow's built in function \textit{tf.gradients()} to calculate the gradient of the highest softmax output with respect to the input. From this we get the results shown in \autoref{fig:task5}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/part5_gradient}
+	\caption{Gradient of the highest output probability with respect to the input.}
+	\label{fig:task5}
+\end{figure}
+
+For this picture of Angie Harmon we notice that the shape of the eye and eyebrows, the pointy nose and pronounced cheeks are strong indications for the classification. In \autoref{part7} we will be able to confirm our hypothesis 
+using guided backpropagation, which gives a clearer visualization.
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	PART 6
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part6}
+
+In order to train AlexNet to recognize our set of artists, we now train the entire network and, differently from \autoref{part2}, don't pre-compute the activations and now back propagate the error gradient throughout the entire network. To speed the process up, we initialize AlexNet with the provided weights and the densely connected layers with the best topology according to the findings of \autoref{part2}, however we reinitialize their values with random values sampled from $\mathcal{N}(0.0001,0.0001)$, since otherwise we would already start the training at a local minimum and would be unlikely to find a better model. We also add regularization to all the network weights and dropout after the pooling layers and hidden densely connected layer in order to avoid overfitting.
+
+With these parameters we obtain the performance listed in \autoref{tab:task6_best}, with the training curves depicted in \autoref{fig:task6_cost} and \autoref{fig:task6_accuracy}. We notice that the training accuracy rapidly converges to 100\% and from this point forward the model just works to generalize itself in order to compensate for dropout and regularization. The final model is not better than the absolute best found in \autoref{part2}, however its performance is comparable to that of the best ranked models.
+
+\begin{table}[H]
+	\centering
+	\resizebox{\columnwidth}{!}{
+		\pgfplotstabletypeset[
+		header=false,
+		col sep=comma,
+		string type,
+		display columns/0/.style={column name=\multicolumn{1}{|c|}{\textbf{Train}}, column type={|S|}},
+		display columns/1/.style={column name=\multicolumn{1}{c|}{\textbf{Validation}}, column type={S|}},
+		display columns/2/.style={column name=\multicolumn{1}{c|}{\textbf{Test}}, column type={S|}},
+		display columns/3/.style={column name=\multicolumn{1}{c|}{\textbf{Train}}, column type={S|}},
+		display columns/4/.style={column name=\multicolumn{1}{c|}{\textbf{Validation}}, column type={S|}},
+		display columns/5/.style={column name=\multicolumn{1}{c|}{\textbf{Test}}, column type={S|}},
+		every head row/.style={before row=\hline \multicolumn{3}{|c|}{\textbf{Cost}} & \multicolumn{3}{c|}{\textbf{Accuracy (\%)}}\\\hline,after row=\hline},
+		every last row/.style={after row=\hline},
+		]{results/part6_result.csv}
+	}
+	\caption{Model performance.}
+	\label{tab:task6_best}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/part6_cost_curve}
+	\caption{Cost curve for the model discussed.}
+	\label{fig:task6_cost}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/part6_accuracy_curve}
+	\caption{Accuracy curve for the model discussed.}
+	\label{fig:task6_accuracy}
+\end{figure}
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	PART 7
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part7}
+
+For guided backpropagation we follow a procedure similar to the one discussed in \autoref{part5}. However, we now have to zero out negative gradients, to do so we take in the fact that our network only has ReLU units, therefore we can change it's gradient to a more convenient calculation using TensorFlow's \textit{@tf.RegisterGradient()} function decorator and then map the ReLU units in the network graph to our custom ReLU.
+
+ReLU's gradient is, by default $\frac{\partial}{\partial x}f(x) = [x>0]$, so during backpropagation it effectively propagates the gradient if it's input is positive, or $\delta_{i} = \delta_{i-1} [x>0]$. We add another indicator function to the gradient, so it only propagates previous positive gradients, or $\delta_{i} = \delta_{i-1} [x>0] [\delta_{i-1}>0]$. The final TensorFlow implementation is listed in \autoref{lst:task7}.
+
+With this method we obtain the outputs depicted in \autoref{fig:task7_gradient}. We can see that the gradient is higher around the eyes, nose and cheekbones. Thus confirming our hypothesis from \autoref{part5}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\columnwidth]{results/part7_gradient}
+	\caption{Gradients obtained with and without guided backpropagation.}
+	\label{fig:task7_gradient}
+\end{figure}
+
+\clearpage
+\begin{lstlisting}[language=Python,
+caption=Custom ReLU Gradient.,
+label={lst:task7}]
+@tf.RegisterGradient("CustomRelu")
+def _custom_relu(op, grad):
+	zero = tf.Variable(0.)
+	relu = op.outputs[0]
+	relub0 = tf.cast(tf.greater(relu, zero), tf.float32)
+	gradb0 = tf.cast(tf.greater(grad, zero), tf.float32)
+	return relub0 * gradb0 * grad
+\end{lstlisting}
+
+\clearpage
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+\end{document}

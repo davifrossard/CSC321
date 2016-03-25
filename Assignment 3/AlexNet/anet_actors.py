@@ -1,7 +1,7 @@
 ################################################################################
 #Michael Guerzhoy, 2016
 #AlexNet implementation in TensorFlow, with weights
-#Details: 
+#Details:
 #http://www.cs.toronto.edu/~guerzhoy/tf_alexnet/
 #
 #With code from https://github.com/ethereon/caffe-tensorflow
@@ -28,7 +28,7 @@ def convert_faces(faces):
     :return: List of processed face images
     '''
     for i, face in enumerate(faces):
-        imgr = imresize(face, (227,227))/255.
+        imgr = imresize(face, (227,227))
         img = (np.random.random((1, 227, 227, 3)) / 255.).astype('float32')
         img[0, :, :, :] = imgr[:, :, :3]
         img = img - np.mean(img)
@@ -42,8 +42,8 @@ def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w,  padding="VALID", group
     assert c_i%group==0
     assert c_o%group==0
     convolve = lambda i, k: tf.nn.conv2d(i, k, [1, s_h, s_w, 1], padding=padding)
-    
-    
+
+
     if group==1:
         conv = convolve(input, kernel)
     else:
@@ -69,7 +69,6 @@ def alex_net_actors(params):
     conv1b = tf.Variable(net_data["conv1"][1])
     conv1_in = conv(img_input, conv1W, conv1b, k_h, k_w, c_o, s_h, s_w, padding="SAME", group=1)
     conv1 = tf.nn.relu(conv1_in)
-    conv1 = tf.nn.dropout(conv1, keep_prob)
 
     #lrn1
     #lrn(2, 2e-05, 0.75, name='norm1')
@@ -84,6 +83,7 @@ def alex_net_actors(params):
     #max_pool(3, 3, 2, 2, padding='VALID', name='pool1')
     k_h = 3; k_w = 3; s_h = 2; s_w = 2; padding = 'VALID'
     maxpool1 = tf.nn.max_pool(lrn1, ksize=[1, k_h, k_w, 1], strides=[1, s_h, s_w, 1], padding=padding)
+    maxpool1 = tf.nn.dropout(maxpool1, keep_prob)
 
 
     #conv2
@@ -93,7 +93,6 @@ def alex_net_actors(params):
     conv2b = tf.Variable(net_data["conv2"][1])
     conv2_in = conv(maxpool1, conv2W, conv2b, k_h, k_w, c_o, s_h, s_w, padding="SAME", group=group)
     conv2 = tf.nn.relu(conv2_in)
-    conv2 = tf.nn.dropout(conv2, keep_prob)
 
 
     #lrn2
@@ -109,6 +108,7 @@ def alex_net_actors(params):
     #max_pool(3, 3, 2, 2, padding='VALID', name='pool2')
     k_h = 3; k_w = 3; s_h = 2; s_w = 2; padding = 'VALID'
     maxpool2 = tf.nn.max_pool(lrn2, ksize=[1, k_h, k_w, 1], strides=[1, s_h, s_w, 1], padding=padding)
+    maxpool2 = tf.nn.dropout(maxpool2, keep_prob)
 
     #conv3
     #conv(3, 3, 384, 1, 1, name='conv3')
@@ -117,7 +117,6 @@ def alex_net_actors(params):
     conv3b = tf.Variable(net_data["conv3"][1])
     conv3_in = conv(maxpool2, conv3W, conv3b, k_h, k_w, c_o, s_h, s_w, padding="SAME", group=group)
     conv3 = tf.nn.relu(conv3_in)
-    conv3 = tf.nn.dropout(conv3, keep_prob)
 
     #conv4
     #conv(3, 3, 384, 1, 1, group=2, name='conv4')
@@ -126,7 +125,6 @@ def alex_net_actors(params):
     conv4b = tf.Variable(net_data["conv4"][1])
     conv4_in = conv(conv3, conv4W, conv4b, k_h, k_w, c_o, s_h, s_w, padding="SAME", group=group)
     conv4 = tf.nn.relu(conv4_in)
-    conv4 = tf.nn.dropout(conv4, keep_prob)
 
 
     #conv5
@@ -136,7 +134,6 @@ def alex_net_actors(params):
     conv5b = tf.Variable(net_data["conv5"][1])
     conv5_in = conv(conv4, conv5W, conv5b, k_h, k_w, c_o, s_h, s_w, padding="SAME", group=group)
     conv5 = tf.nn.relu(conv5_in)
-    conv5 = tf.nn.dropout(conv5, keep_prob)
 
     #maxpool5
     #max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
@@ -163,15 +160,14 @@ def alex_net_actors(params):
     oA = tf.nn.softmax(oZ)
 
     weights = [dcW, oW, conv5W, conv4W, conv3W, conv2W, conv1W]
-    activations = layers + [dcA]
 
-    regularizer = 0
-    for i in range(params[4]):
+    regularizer = tf.nn.l2_loss(dcW)
+    for i in range(1,params[-1]+2):
         regularizer += tf.nn.l2_loss(weights[i])
-
     return img_input, oA, oZ, keep_prob, regularizer, layers
 
 def eval_alex_net(faces, params):
+    faces = convert_faces(faces)
 
     img_input, output, _, dropout, _, _ = alex_net_actors(params)
     sess = tf.Session()
@@ -189,7 +185,9 @@ def eval_alex_net(faces, params):
 
     return outputs, classes
 
-def train_alex_net(sets, params, max_iter=500, lmbda=0.001, keep_prob=0.9):
+def train_alex_net(sets, params, max_iter=500, lmbda=0.0005, keep_prob=0.8):
+    for i in range(len(params)-1):
+        params[i] = np.random.normal(0.0001, 0.0001, params[i].shape).astype('float32')
     x, softmax, logits, dropout, regularizer, _ = alex_net_actors(params)
     costs = []
     accuracies = []
@@ -203,7 +201,7 @@ def train_alex_net(sets, params, max_iter=500, lmbda=0.001, keep_prob=0.9):
         iter_var = tf.Variable(0)
         cost_batch = tf.nn.softmax_cross_entropy_with_logits(logits, y)
         cost = tf.reduce_mean(cost_batch) + lmbda * regularizer
-        optimizer = tf.train.GradientDescentOptimizer(0.001).minimize(cost, global_step=iter_var)
+        optimizer = tf.train.GradientDescentOptimizer(0.0005).minimize(cost, global_step=iter_var)
 
     with tf.name_scope("Evaluation") as scope:
         correct_prediction = tf.equal(tf.argmax(softmax, 1), tf.argmax(y, 1))
@@ -236,7 +234,7 @@ def train_alex_net(sets, params, max_iter=500, lmbda=0.001, keep_prob=0.9):
                     sess.run(best_acc.assign(vaccuracy))
                     saver.save(sess, "trained_alexnet.ckpt")
                     with open('results/part6_result.csv', 'w+') as fl:
-                        fl.write("%.4f, %.2f, %.4f, %.2f, %.4f, %.2f\n" %(tcost, taccuracy, vcost, vaccuracy, tecost, teaccuracy))
+                        fl.write("%.4f, %.2f, %.4f, %.2f, %.4f, %.2f\n" %(tcost, vcost, tecost, taccuracy, vaccuracy, teaccuracy))
 
                 st = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
                 print "[%s] Epoch: %3d" % (st, epoch)
@@ -258,27 +256,38 @@ def gradient_output(face_o, params):
     img_input, output, _, dropout, _, _ = alex_net_actors(params)
     sess = tf.Session()
     init = tf.initialize_all_variables()
-    ggrads = tf.gradients(output, img_input)[0]
 
     with sess.as_default():
         sess.run(init)
         for i,face in enumerate(faces):
+            op = sess.run(output, feed_dict={img_input:face, dropout: 1.0})[0]
+            cl = np.argmax(op)
+            smax = tf.split(1, 6, output)[cl]
+            ggrads = tf.gradients(smax, img_input)[0]
+            sess.run(init)
             grads = sess.run(ggrads, feed_dict={img_input:face, dropout: 1.0})[0]
             if np.max(grads) > 0:
                 break
 
-    grads = 255. * grads / np.max(grads)
+    grads = grads / np.max(grads)
     grads = np.maximum(grads, 0)
     plt.suptitle('Image Gradient', size=20)
-    plt.subplot(121)
+    plt.subplot(221)
     plt.imshow(face_o[i])
     plt.title('Input image')
     plt.axis('off')
-    plt.subplot(122)
-    plt.imshow(rgb2gray(grads))
+
+    plt.subplot(222)
+    plt.imshow(grads)
     plt.title('Gradient')
     plt.axis('off')
-    plt.gray()
+
+    plt.subplot(235)
+    plt.imshow(grads)
+    plt.imshow(imresize(face_o[i], (227,227)), alpha=0.5)
+    plt.title('Overlay')
+    plt.axis('off')
+
 
     return grads, i
 
@@ -300,7 +309,7 @@ def plot_curves(cost, accuracy):
     plt.plot(t, accuracy[:,2], label='Test Set')
     plt.legend(loc='best')
     plt.xlabel('Epoch')
-    plt.ylabel('Accuracy (%%)')
+    plt.ylabel('Accuracy (%)')
     plt.title('AlexNet Training Curve')
     plt.grid()
     plt.savefig('results/part6_accuracy_curve.pdf')
@@ -476,23 +485,13 @@ def plot_gradients(face, params, act):
     grad /= np.max(grad)
     grad2 /= np.max(grad2)
 
-    plt.subplot(2,4,3)
+    plt.subplot(2,2,2)
     plt.imshow(np.maximum(grad,0))
-    plt.title('Guided Gradient\n(+)')
+    plt.title('Guided Gradient')
     plt.axis('off')
 
-    plt.subplot(2,4,4)
-    plt.imshow(np.abs(grad))
-    plt.title('Guided Gradient\n(Abs)')
-    plt.axis('off')
-
-    plt.subplot(2,4,7)
-    plt.imshow(np.minimum(grad,0))
-    plt.title('Guided Gradient\n(-)')
-    plt.axis('off')
-
-    plt.subplot(2,4,8)
-    plt.imshow(rgb2gray(grad2))
+    plt.subplot(2,2,4)
+    plt.imshow(grad2)
     plt.gray()
     plt.title('Gradient')
     plt.axis('off')
@@ -503,5 +502,6 @@ def plot_gradients(face, params, act):
     plt.axis('off')
 
     plt.tight_layout()
+    plt.subplots_adjust(top=0.8)
 
     return grad, grad2

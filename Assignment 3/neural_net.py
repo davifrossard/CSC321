@@ -7,13 +7,13 @@ import cPickle as cp
 from operator import mul
 from functools import reduce
 
-def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_size=50, dropout=0.8, index=0, lmbda=0,
+def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_size=150, dropout=0.8, index=0, lmbda=0,
                      max_iter=3000, best=float('inf'), conv_input=False, save=False, title=None):
 
     x_train, t_train, x_validation, t_validation, x_test, t_test = sets
+    print "Set Sizes: %d - %d - %d" %(len(t_train), len(t_validation), len(t_test))
 
     in_size = reduce(mul, list(x_train[0].shape))
-    in_dim = int(np.sqrt(in_size))
     nclass = 6
     EXP = 1e-5 # Convergence tolerance
     two_layer = len(hidden_units) > 1
@@ -25,8 +25,8 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
     ''' NEURAL NETWORK TOPOLOGY '''
     # Hidden Layer
     with tf.name_scope("Hidden_Layer") as scope:
-        w0 = tf.Variable(tf.truncated_normal([in_size, hidden_units[0]], mean=0.01, stddev=0.01), name="Weight")
-        b0 = tf.Variable(tf.truncated_normal([hidden_units[0]], mean=0.01, stddev=0.01), name="Bias")
+        w0 = tf.Variable(tf.truncated_normal([in_size, hidden_units[0]], mean=0, stddev=0.01), name="Weight")
+        b0 = tf.Variable(tf.ones([hidden_units[0]])*0.1, name="Bias")
         a0 = functions[0](tf.matmul(x, w0) + b0)
         d0 = tf.nn.dropout(a0, keep_prob)
         out = d0
@@ -34,16 +34,16 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
     # Second hidden layer
     if two_layer:
         with tf.name_scope("2nd_Hidden_Layer") as scope:
-            w1 = tf.Variable(tf.truncated_normal([hidden_units[0], hidden_units[1]], mean=0.01, stddev=0.01), name="Weight")
-            b1 = tf.Variable(tf.truncated_normal([hidden_units[1]], mean=0.01, stddev=0.01), name="Bias")
+            w1 = tf.Variable(tf.truncated_normal([hidden_units[0], hidden_units[1]], mean=0, stddev=0.01), name="Weight")
+            b1 = tf.Variable(tf.ones([hidden_units[1]])*0.1, name="Bias")
             a1 = functions[1](tf.matmul(out, w1) + b1)
             d1 = tf.nn.dropout(a1, keep_prob)
             out = d1
 
     # Output Layer
     with tf.name_scope("Output_Layer") as scope:
-        wout = tf.Variable(tf.truncated_normal([hidden_units[-1], nclass], mean=0.01, stddev=0.01), name="Weight")
-        bout = tf.Variable(tf.truncated_normal([nclass], mean=0.01, stddev=0.01), name="Bias")
+        wout = tf.Variable(tf.truncated_normal([hidden_units[-1], nclass], mean=0, stddev=0.01), name="Weight")
+        bout = tf.Variable(tf.ones([nclass])*0.1, name="Bias")
         logits = tf.matmul(out, wout) + bout
         output = tf.nn.softmax(logits)
     ''' END NEURAL NETWORK TOPOLOGY '''
@@ -58,7 +58,7 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
             l1_regularizer = tf.reduce_mean(tf.abs(w0)) + tf.reduce_mean(tf.abs(w1)) if two_layer else tf.reduce_mean(tf.abs(w0))
         cost_batch = tf.nn.softmax_cross_entropy_with_logits(logits, y)
         cost = tf.reduce_mean(cost_batch) + lmbda * regularizer
-        optimizer = tf.train.AdamOptimizer().minimize(cost, global_step=iter_var)
+        optimizer = tf.train.AdamOptimizer(0.0005).minimize(cost, global_step=iter_var)
 
     # Test accuracy
     with tf.name_scope("Evaluation") as scope:
@@ -102,7 +102,7 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
 
     last_cost = 0
     last_val = 0
-
+    costs, accuracies = [], []
     with sess.as_default():
         # Training cycle
         total_batches = int(x_train.shape[0] / batch_size)
@@ -131,7 +131,8 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
 
                 test = sess.run(test_ops, feed_dict={x: x_test, y: t_test, keep_prob: 1})
                 writer.add_summary(test[0], epoch)
-
+                costs.append([train[1], validation[1], test[1]])
+                accuracies.append([train[2], validation[2], test[2]])
                 if abs(train[1] - last_cost) < EXP:
                     print "Converged!"
                     break
@@ -156,9 +157,13 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
                     print "\tValidation Set: Cost: %8.3f Accuracy: %d%%" %(validation[1], validation[2])
                     print "\tTest Set:       Cost: %8.3f Accuracy: %d%%\n\n" %(test[1], test[2])
 
-                    if epoch % max_iter == 0:
-                        print "Too many epochs!"
-                        break
+                    if epoch >= 500 and last_val < 50:
+                        print "Bad model"
+                        break64
+
+            if epoch >= max_iter:
+                print "Too many epochs!"
+                break
 
     if validation[2] > best or save:
         with open('results/neural_network_%s%s.pickle' %('conv' if conv_input else 'ff', '_'+str(title) if title else ''), 'wb') as f:
@@ -168,7 +173,7 @@ def train_neural_net(sets, hidden_units=[300], functions=[tf.nn.relu], batch_siz
 
     print "Optimization Finished!"
 
-    return bench_val
+    return bench_val, costs, accuracies
 
 
 def visualize_weights(w, num=-1, title=None):
@@ -185,4 +190,33 @@ def visualize_weights(w, num=-1, title=None):
     cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
     fig.colorbar(heatmap, cax=cbar_ax)
     plt.savefig('results/weights_%s.pdf' %(title), bbox_inches='tight')
+    plt.close()
+
+def plot_curves(cost, accuracy, conv=False, nhidden=[295], funs=['relu'], lmbda=0.001, convlayer=4, autotitle=False):
+    cost, accuracy = np.array(cost), np.array(accuracy)
+    title = '' if not conv else '_conv'
+    if not autotitle:
+        if conv:
+            title += '_%d' %convlayer
+        title += '_%s_%s_%f' %("_".join(str(n) for n in nhidden), "_".join(funs), lmbda)
+    t = np.array(range(len(cost[:,0])))*5
+    plt.plot(t, cost[:,0], label='Train Set')
+    plt.plot(t, cost[:,1], label='Validation Set')
+    plt.plot(t, cost[:,2], label='Test Set')
+    plt.legend(loc='best')
+    plt.xlabel('Epoch')
+    plt.ylabel('Cost')
+    plt.title('Training Curve')
+    plt.grid()
+    plt.savefig('results/part12_cost%s_curve.pdf' %title)
+    plt.close()
+    plt.plot(t, accuracy[:,0], label='Train Set')
+    plt.plot(t, accuracy[:,1], label='Validation Set')
+    plt.plot(t, accuracy[:,2], label='Test Set')
+    plt.legend(loc='best')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy (%)')
+    plt.title('Training Curve')
+    plt.grid()
+    plt.savefig('results/part12_accuracy%s_curve.pdf' %title)
     plt.close()
