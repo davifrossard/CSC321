@@ -1,8 +1,10 @@
 import tensorflow as tf
 import numpy as np
 from os import path, makedirs
-from utils import round_up
+from math import ceil
 
+def round_up(val, base):
+    return int(ceil(float(val)/base)*base)
 
 class RNN_Model:
 
