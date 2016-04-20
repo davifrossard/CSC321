@@ -120,6 +120,7 @@ class RNN_Model:
             Samples a text from the RNN using seed as the initial exciter.
         :param seed: Initial exciter
         :param sample_length: Length of the sample to be produced
+        :param temperature: Softmax temperature
         :return: Produced sample
         '''
         self.temperature = temperature
@@ -242,17 +243,15 @@ class RNN_Model:
     def test_sequence(self, init, next, samples=500):
         init_ix = self.char_to_ix[init]
         next_ix = self.char_to_ix[next]
-        p = self.get_prob(init_ix)[0]
 
         self.excite_rnn(init_ix)
         hprev_avg = self.hprev
+        p = self.get_prob(init_ix)[0]
 
         chars = np.array(self.ix_to_char.values())
         for i in range(samples):
             # "Reshuffle" RNN state
-            sequence = np.random.randint(0,len(self.ix_to_char),20)
-            phrase = ''.join(chars[sequence])
-            self.complete_phrase(phrase, minlenght=10)
+            self.sample_rnn(chars[np.random.randint(0,len(chars))], 10)
 
             # Compute state after feeding init_ix
             self.excite_rnn(init_ix)
@@ -263,10 +262,11 @@ class RNN_Model:
         avg_wxh = np.mean(self.Wxh[:, init_ix])
         best_weights = [i for i in ibprev if self.Wxh[i, init_ix] > 0 and self.Wxh[i, init_ix] > avg_wxh]
 
+
         print_info("Hypothesis with %.2f%% probability" % (p[next_ix]*100))
         nexchar = np.argmax(p)
         genchar = self.ix_to_char[nexchar]
-        print_info("\t%s with highest probability (%.2f%%) after %s\n"
+        print_info("\t%s with highest probability (%.2f%%) after %s"
                     %(repr(genchar), p[nexchar]*100, repr(init)))
         if(genchar != next):
             print_info("\t%s with %.2f%% probability"
@@ -285,11 +285,9 @@ class RNN_Model:
     def find_association(self, chr, temperature=1, numsamples=100):
         a = []
         ix = self.char_to_ix[chr]
-        for i in range(1000):
-            hp = self.hprev
+        chars = self.ix_to_char
+        for i in range(numsamples):
             p = self.get_prob(ix)[0]
-            self.hprev = hp
-            ipmax, pmax = np.argmax(p), np.max(p)
-            genchar = self.ix_to_char[ipmax]
-            a.append(genchar)
-        return max(set(a), key=a.count)
+            ipmax = np.argmax(p)
+            a.append(ipmax)
+        return self.ix_to_char[max(set(a), key=a.count)]

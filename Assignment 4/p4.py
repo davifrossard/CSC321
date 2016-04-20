@@ -48,7 +48,7 @@ try:
             p = 0
             RNN.reset_state()
             print_warning("[I] Finished pass through file.")
-
+            
         # Show progress
         if n % 250 == 0:
             print "---------------------------------------------"
@@ -71,10 +71,10 @@ except KeyboardInterrupt:
 print_info("\n\n---------------------\n"
            "RUNNING PART 1\n"
            "---------------------\n")
-temperatures = [0.01, 0.01, 0.1, 0.5, 0.7, 1, 1.5]
+temperatures = [0.1, 0.5, 0.7, 1., 1.5]
 for i in temperatures:
     samples = []
-    for j in range(5):
+    for j in range(3):
         samples.append(RNN.sample_rnn(data[np.random.randint(0, len(data))], 200, i))
     samples = '\n-----------------------------------------\n\n'.join(s.rstrip() for s in samples)
     print samples
@@ -113,10 +113,14 @@ init_ix = RNN.char_to_ix[':']
 end_ix = RNN.char_to_ix['\n']
 
 with open('results/part3_weights.txt', 'w+') as f:
-    f.write('Input to State Weights: [%s, %d]'
-            'State to Output Weights: [%d, %s]'
+    f.write('Input to State Weights: [%s, %d]\n'
+            '\t%s\n\n'
+            'State to Output Weights: [%d, %s]\n'
+            '\t%s\n\n'
             %(best_weights, init_ix,
-              end_ix, best_weights))
+            ', '.join((str(w) for w in RNN.Wxh[best_weights, init_ix])),
+              end_ix, best_weights,
+            ', '.join((str(w) for w in RNN.Why[end_ix, best_weights]))))
 
 #
 # ------------------------
@@ -129,7 +133,7 @@ RNN.reload_rnn()
 
 associations = []
 for char in sorted(chars):
-    res = RNN.find_association(char, 0.6)
+    res = RNN.find_association(char, 1)
     association = repr("%s [%2d] -> %s [%2d]" % (char, RNN.char_to_ix[char],
                                                res, RNN.char_to_ix[res]))
     print association
@@ -138,13 +142,18 @@ for char in sorted(chars):
 with open('results/part4_associations.txt', 'w+') as f:
     f.write('%s' %  '\n'.join(a for a in associations))
 
+RNN.reload_rnn()
 best_weights = RNN.test_sequence('S', ':')
 
 init_ix = RNN.char_to_ix['S']
 end_ix = RNN.char_to_ix[':']
 
-with open('results/part3_weights.txt', 'w+') as f:
-    f.write('Input to State Weights: [%s, %d]'
-            'State to Output Weights: [%d, %s]'
+with open('results/part4_weights.txt', 'w+') as f:
+    f.write('Input to State Weights: [%s, %d]\n'
+            '\t%s\n\n'
+            'State to Output Weights: [%d, %s]\n'
+            '\t%s\n\n'
             %(best_weights, init_ix,
-              end_ix, best_weights))
+            ', '.join((str(w) for w in RNN.Wxh[best_weights, init_ix])),
+              end_ix, best_weights,
+            ', '.join((str(w) for w in RNN.Why[end_ix, best_weights]))))

@@ -1,0 +1,481 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Programming/Coding Assignment
+% LaTeX Template
+%
+% This template has been downloaded from:
+% http://www.latextemplates.com
+%
+% Original author:
+% Ted Pavlic (http://www.tedpavlic.com)
+%
+% Note:
+% The \lipsum[#] commands throughout this template generate dummy text
+% to fill the template out. These commands should all be removed when 
+% writing assignment content.
+%
+% This template uses a Perl script as an example snippet of code, most other
+% languages are also usable. Configure them in the "CODE INCLUSION 
+% CONFIGURATION" section.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{longtable}
+\usepackage{bm}
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{listings, multicol} % Required for insertion of code
+\usepackage{courier} % Required for the courier font
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+\usepackage{pgfplotstable} % Import csv data
+\usepackage{amsmath} % Math equation tools
+\usepackage{hyperref} % Create references\pgfplotsset{compat=1.12}
+\usepackage{filecontents}% Used so that the external files can be placed in this file
+\usepackage{pgffor} % Loops in latex
+\usepackage{bookmark}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{siunitx} % Formats the units and values
+\usepackage{parskip}
+
+\setlength{\parskip}{10pt} % 1ex plus 0.5ex minus 0.2ex}
+
+
+
+% Setup siunitx:
+\sisetup{
+  round-mode          = places, % Rounds numbers
+  round-precision     = 4, % to 2 places
+}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+\renewcommand{\tableautorefname}{Table}
+\renewcommand{\lstlistingname}{Code}
+\renewcommand{\equationautorefname}{Eq.}
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkClass\ (\hmwkClassTime): \hmwkTitle} % Top center head
+%\rhead{\firstxmark} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\DeclareGraphicsExtensions{.eps,.pdf,.png,.jpg,.jpeg}
+
+%----------------------------------------------------------------------------------------
+%	CODE INCLUSION CONFIGURATION
+%----------------------------------------------------------------------------------------
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{Python} % Load Perl syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=Python, % Use Perl in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}\bf, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers                                         
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=2, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=1  % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\perlscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1]{#1.pl}
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+%\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+%\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+%\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+%\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{0} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+\setcounter{homeworkProblemCounter}{0}
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Part \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\def\sectionautorefname{Part}
+\refstepcounter{homeworkProblemCounter}%
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+\noindent\framebox[\columnwidth][c]{\begin{minipage}{0.98\columnwidth}#1\end{minipage}} % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Assignment 3} % Assignment title
+\newcommand{\hmwkDueDate}{Monday,\ March\ 21,\ 2016} % Due date
+\newcommand{\hmwkClass}{CSC321} % Course/class
+\newcommand{\hmwkClassTime}{L0101} % Class/lecture time
+\newcommand{\hmwkAuthorName}{Davi Frossard} % Your name
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+\normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
+\vspace{0.1in}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+%\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+	
+
+\maketitle\clearpage
+
+
+%----------------------------------------------------------------------------------------
+%	PART 1
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part1}
+
+In order to implement sampling from the RNN with temperature, all we must do is modify the softmax equation in the provided sampling function to account for the temperature. We do so in \autoref{lst:fsample}.
+
+\begin{lstlisting}[language=Python,
+caption=Implementation of Text Sampling Function With Temperature.,
+label={lst:fsample}]
+def sample_rnn(self, seed, sample_length, temperature=1):
+	'''
+	Samples a text from the RNN using seed as the initial exciter.
+	:param seed: Initial exciter
+	:param sample_length: Length of the sample to be produced
+	:param temperature: Softmax temperature
+	:return: Produced sample
+	'''
+	self.temperature = temperature
+	x = self.one_hot(self.char_to_ix[seed])
+	sample = ''
+	for t in xrange(sample_length):
+		self.hprev = np.tanh(np.dot(self.Wxh, x) + np.dot(self.Whh, self.hprev) + self.bh)
+		y = np.dot(self.Why, self.hprev) + self.by
+		p = np.exp(y/self.temperature) / np.sum(np.exp(y/self.temperature))
+		ix = np.random.choice(range(self.vocab_size), p=p.ravel())
+		sample += self.ix_to_char[ix]
+		x = self.one_hot(ix)
+	
+	return sample
+\end{lstlisting}
+
+With this implementation, we draw samples with temperatures in [0.1, 0.5, 0.7, 1.0, 1.5], obtaining the results shown in \autoref{lst:fsample_0.100000}-\ref{lst:fsample_1.500000}. 
+
+\foreach \temp in {0.100000, 0.500000, 0.700000, 1.000000, 1.500000}
+{
+	\lstinputlisting[language={},
+	breaklines=true,
+	caption=Samples With Temperature \temp.,
+	label={lst:fsample_\temp}]{results/samples_\temp.txt}
+}
+
+We notice that smaller values of temperature produces only the most likely outputs, which gives us essentially just a chain of "the", not an interesting result at all.
+
+As we increase the temperature, the softmax function returns a distribution less concentrated around the most likely output, which in turn produces samples more interesting and that closely resemble the original text. Values from 0.5 to 1.0 seem to produce the best results, as seen in \autoref{lst:fsample_0.500000}-\ref{lst:fsample_1.000000}.
+
+However, if we increase the temperature too much, the distribution starts to converge to a uniform, with outputs that are very unlikely being generated often. \autoref{lst:fsample_1.500000} shows samples in which most words are not valid and the general structure of the text does not resemble the original data.
+
+\end{homeworkProblem}
+\clearpage
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+%	PART 2
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part2}
+
+To complete a phrase, we must first excite the RNN with each letter in it in order to have the state of the RNN at the end reflect the encoding of the phrase. We do so by changing the function implemented in \autoref{part1} so that the seed is a string (not just a single character) and make the RNN generates a minimum of \textit{minlength} characters and stop after generating a character that symbolizes an ending (".", "!", "? " or a newline). With these specifications we get the implementation listed in \autoref{lst:phrase_completion}.
+
+\begin{lstlisting}[language=Python,
+caption=Implementation of Phrase Completion Function.,
+label={lst:phrase_completion}]
+def complete_phrase(self, phrase, temperature=1, minlenght=100):
+	'''
+	Completes a given phrase using RNN samples.
+	:param phrase: Phrase to be completed
+	:return: Phrase with completion
+	'''
+	self.temperature = temperature
+	phrase_ix = [self.char_to_ix[ch] for ch in phrase]
+	#Compute states for sequence
+	for chr in phrase_ix:
+		self.excite_rnn(chr)
+	
+	# Compute first letter after phrase
+	y = np.dot(self.Why, self.hprev) + self.by
+	p = np.exp(y/self.temperature) / np.sum(np.exp(y/self.temperature))
+	ix = np.random.choice(range(self.vocab_size), p=p.ravel())
+	
+	# Keep generating letters:
+	sample = self.ix_to_char[ix]
+	len = 0
+	while True:
+		p = self.get_prob(ix)[0]
+		ix = np.random.choice(range(self.vocab_size), p=p.ravel())
+		char = self.ix_to_char[ix]
+		len += 1
+		if char not in ['.', '\n', '!', '?'] or len < minlenght:
+			sample += char
+		else:
+			sample += char
+			break
+	return phrase+sample
+\end{lstlisting}
+
+We do not consistently get meaningful sentences running this function in generic phrases. However, playing with the temperature and seeds we get somewhat interesting results:
+
+\noindent\makebox[\linewidth]{\rule{5cm}{0.4pt}}
+\begin{quote}
+\textbf{The answer to life the universe and everything is} hell. And to this hear blood you to the counterst behertererter to to not have.
+\end{quote}
+
+\textit{Interesting apocalyptic approach to the subject, not the 42 we were expecting.}
+
+\clearpage
+\noindent\makebox[\linewidth]{\rule{5cm}{0.4pt}}
+\begin{quote}
+\textbf{To be or not to be} peanut.
+Second thishing heavence, we dont'd farsite like me have fre?
+
+CORIOLANUS:
+
+He the com thene the the bood the so the sun be all this a
+\end{quote}
+
+This one is specially interesting considering that the word "peanut" does not appear in the training set. It then proceeds to use structures known from the text.
+
+\noindent\makebox[\linewidth]{\rule{5cm}{0.4pt}}
+\begin{quote}
+\textbf{CORIOLANUS:}
+
+And let is they with that ther the not is ap hoar,
+
+I dode to the the him Cay.
+
+I that man, who go dearther our this and a have had,
+
+and he more no the revenster to he wonds I thim in they me.
+\end{quote}
+
+We notice that using character names as the starting string consistently produces text that closely resemble the structure of the original text (albeit they might not really make sense).
+
+\noindent\makebox[\linewidth]{\rule{5cm}{0.4pt}}
+\begin{quote}
+\textbf{Neural networks writing Shakespeare} is him wath he held the made of to a him the noble
+
+The ancity in pare all the had more he porst 'tben lith: prood
+\end{quote}
+
+\noindent\makebox[\linewidth]{\rule{5cm}{0.4pt}}
+\begin{quote}
+\textbf{Strive not to be a success, but rather} to be the greater half
+
+But O'lredagher?
+
+MENENIUS:
+
+I vers combane at he more he he format; we thretredistrr atsion lood, wit?
+\end{quote}
+
+It's interesting that it actually got the "to be" completion to the quote right, although the rest makes little sense.
+\end{homeworkProblem}
+\clearpage
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	PART 3
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part3}
+
+To find the most relevant weights in determining that a certain sequence is likely to be generated, in this case a newline \textit{"\textbackslash n"} after a colon \textit{":"}, we first find the behaviour of the RNN's state by averaging out multiple samples of it after feeding a colon. We then compute the product between the State-to-Output weights (\textit{Why}) connected to the newline output and select the entries corresponding to the 10 biggest values. Afterwards we check the Input-to-State weights (\textit{Wxh}) at the entries found beforehand and remove the ones that point to negative or below the average weights.
+
+With this method, we're left with weights that mostly contribute to the probability of generating a newline after a colon. The implementation is shown in \autoref{lst:hypothesis_fun}.
+
+\begin{lstlisting}[language=Python,
+caption=Implementation of Text Sampling Function With Temperature.,
+label={lst:hypothesis_fun}]
+def test_sequence(self, init, next, samples=500):
+	init_ix = self.char_to_ix[init]
+	next_ix = self.char_to_ix[next]
+	
+	self.excite_rnn(init_ix)
+	hprev_avg = self.hprev
+	p = self.get_prob(init_ix)[0]
+	
+	chars = np.array(self.ix_to_char.values())
+	for i in range(samples):
+		# "Reshuffle" RNN state
+		self.sample_rnn(chars[np.random.randint(0,len(chars))], 10)
+		
+		# Compute state after feeding init_ix
+		self.excite_rnn(init_ix)
+		hprev_avg = (hprev_avg + self.hprev)/2
+	
+	pred = hprev_avg.ravel()*self.Why[next_ix,:]
+	ibprev = np.argsort(pred)[::-1][:10]
+	avg_wxh = np.mean(self.Wxh[:, init_ix])
+	best_weights = [i for i in ibprev if self.Wxh[i, init_ix] > 0 
+																			and self.Wxh[i, init_ix] > avg_wxh]
+	
+	
+	print_info("Hypothesis with %.2f%% probability" % (p[next_ix]*100))
+	nexchar = np.argmax(p)
+	genchar = self.ix_to_char[nexchar]
+	print_info("\t%s with highest probability (%.2f%%) after %s"
+						%(repr(genchar), p[nexchar]*100, repr(init)))
+	if(genchar != next):
+		print_info("\t%s with %.2f%% probability"
+							%(repr(next), p[next_ix]*100))
+	print "Weights Involved:"
+	print "\tWxh at [:,%d]" % init_ix
+	print "\tWhy at [%d,:]" % next_ix
+	
+	print "Most relevant weighs:"
+	print "\tWxh at [[%s], %d]" %(', '.join((str(s) for s in best_weights)), init_ix)
+	print "\tWhy at [%d, [%s]]" %(next_ix, ', '.join((str(s) for s in best_weights)))
+	
+	return best_weights
+\end{lstlisting}
+
+Using the function proposed, we get the results listed in \autoref{lst:weights3}. If we check the pre-softmax output at these coordinates, it indeed mostly corresponds to the biggest values, reinforcing our belief in the method.
+
+\lstinputlisting[language={},
+breaklines=true,
+caption=Most relevant weights in generating a newline after a colon,
+label={lst:weights3}]{results/part3_weights.txt}
+
+\end{homeworkProblem}
+\clearpage
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+%	PART 4
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\label{part4}
+
+To find other character associations, we generate the output probabilities after a character over a large amount of samples, and then return the one that appears most frequently, following the implementation shown in \autoref{lst:nexchar}.
+
+\begin{lstlisting}[language=Python,
+caption=Implementation of Text Sampling Function With Temperature.,
+label={lst:nexchar}]
+def find_association(self, chr, temperature=1, numsamples=1000):
+	a = []
+	ix = self.char_to_ix[chr]
+	chars = self.ix_to_char
+	for i in range(numsamples):
+		p = self.get_prob(ix)[0]
+		# Reshuffle state
+		self.sample_rnn(chars[np.random.randint(0,len(chars))], 10)
+		ipmax, pmax = np.argmax(p), np.max(p)
+		genchar = self.ix_to_char[ipmax]
+		a.append(genchar)
+	return max(set(a), key=a.count)
+\end{lstlisting}
+
+Iterating over all the characters known to the RNN, we get the following results:
+
+\begin{multicols}{3}
+\lstinputlisting[language={},
+frame=none,
+label={lst:weights3}]{results/part4_associations.txt}
+\end{multicols}
+
+Its particularly interesting the chain formed between $U\rightarrow S\rightarrow \colon$ considering that most character names end with "US" (Brutus, Menenius, Sicinius, Coriolanus - in fact the chain can be extended to $N\rightarrow I\rightarrow U\rightarrow S\rightarrow \colon$ with these name patterns) and it is usually followed by a colon in the text. So we apply the same method used in \autoref{part3} in the sequence $S\rightarrow \colon$ and obtain the results shown in \autoref{lst:weights4}. 
+
+\clearpage
+\lstinputlisting[language={},
+breaklines=true,
+caption=Most relevant weights in generating a newline after a colon,
+label={lst:weights4}]{results/part4_weights.txt}
+
+Checking the outputs, we can ascertain the same probabilities observed in \autoref{part3}.
+\end{homeworkProblem}
+\clearpage
+%----------------------------------------------------------------------------------------
+
+
+\end{document}
